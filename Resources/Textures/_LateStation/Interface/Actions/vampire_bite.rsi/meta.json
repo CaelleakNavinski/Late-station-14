@@ -1,1 +1,12 @@
-placeholder
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Vampire role icon from Town of Salem 1 by BlankMediaGames",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    { "name": "icon" }
+  ]
+}
