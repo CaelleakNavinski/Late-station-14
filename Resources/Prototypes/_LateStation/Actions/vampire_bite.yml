@@ -1,8 +1,12 @@
-- type: EntityTarget
-  id: VampireBiteAction
-  event: VampireBiteActionEvent
-  category: Vampire
-  icon: /Textures/Interface/Actions/vampire_bite.svg
-  message: "Toggle Bite"
-  description: "Arm your fangs to bite a target and initiate vampiric infection."
-  tier: Antagonist
+- type: entity
+  id: ActionVampireBite
+  name: Vampire Bite
+  description: Arm your fangs to bite a target and begin their transformation into a vampire.
+  components:
+  - type: EntityTargetAction
+    icon:
+      sprite: _LateStation/Interface/Actions/vampire_bite.rsi
+      state: icon
+    itemIconStyle: BigAction
+    priority: -5
+    event: !type:VampireBiteActionEvent {}
