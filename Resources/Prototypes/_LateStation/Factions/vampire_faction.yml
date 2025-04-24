@@ -1,9 +1,0 @@
-- type: Faction
-  id: VampireFaction
-  team: Antagonist
-  description: "Ancient predators stalking the station's dark corners."
-  enemies: 
-    - Crew
-    - Syndicate
-  friends:
-    - VampireFaction
