@@ -291,7 +291,7 @@
    parent: BasePlushie
    id: ToyPlushieJames #senile
    name: Plushie of James
-   description: The medical expert that reffers to his headset as talkbox
+   description: The medical expert that refers to his headset as talkbox
    components:
    - type: Sprite
      sprite: _LateStation/Objects/Fun/Toys/james-plushie.rsi

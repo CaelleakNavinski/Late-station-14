@@ -1,0 +1,39 @@
+# Players: ReboundQ3 - Character: James C Rondo
+- type: entity
+  parent: Cane
+  id: PersonalItemJamesCane
+  name: James' Cane
+  description: A plasteel cane.
+  suffix: PersonalItem
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/cane.rsi
+    state: cane
+  - type: Item
+    size: Normal
+    sprite: Objects/Weapons/Melee/cane.rsi
+  - type: Appearance
+  - type: MeleeWeapon
+    wideAnimationRotation: 45
+    damage:
+      types:
+        Blunt: 5
+  - type: StaminaDamageOnHit
+    damage: 5
+  - type: Wieldable
+  - type: IncreaseDamageOnWield
+    damage:
+      types:
+        Blunt: 3
+  - type: UseDelay
+    delay: 1
+
+- type: loadout
+  id: PersonalItemJamesCane
+  storage:
+    back:
+      - PersonalItemJamesCane
+  effects:
+  - !type:PersonalItemLoadoutEffect
+    character:
+    - James C Rondo

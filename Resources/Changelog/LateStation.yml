@@ -422,3 +422,9 @@ Entries:
       message: You can now use emotes while you sleep.
   id: 50
   time: '2025-04-23T22:29:58.0000000+00:00'
+- author: ReboundQ3
+  changes:
+    - type: Add
+      message: Personal items can now be added!
+  id: 51
+  time: '2025-04-25T08:56:52.0000000+00:00'

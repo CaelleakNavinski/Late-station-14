@@ -1,0 +1,27 @@
+# Player: ReboundQ3 - Character: James C Rondo
+- type: entity
+  parent: BasePlushie
+  id: PersonalItemJamesPlushie
+  name: Plushie of James
+  description: The medical expert that refers to his headset as talkbox
+  suffix: PersonalItem
+  components:
+  - type: Sprite
+    state: james-plushie
+    sprite: _LateStation/Objects/Fun/Toys/james-plushie.rsi
+  # - type: Clothing
+  #   quickEquip: false
+  #   sprite: _LateStation/Objects/Fun/Toys/james-plushie.rsi
+  #   equippedPrefix: james
+  #   slots:
+  #   - HEAD
+
+- type: loadout
+  id: PersonalItemJamesPlushie
+  storage:
+    back:
+    - PersonalItemJamesPlushie
+  effects:
+  - !type:PersonalItemLoadoutEffect
+    character:
+    - James C Rondo
