@@ -20,3 +20,27 @@
         tableId: CalmPestEventsTable
       - !type:NestedSelector
         tableId: SpicyPestEventsTable
+
+- type: entity
+  id: Vampires
+  parent: BaseGameRule
+  components:
+  - type: GameRule
+    minPlayers: 10
+  - type: VampireRule
+  - type: AntagSelection
+    selectionTime: IntraPlayerSpawn
+    definitions:
+    - prefRoles: [ VampMat ]
+      max: 1
+      playerRatio: 10
+      briefing:
+        text: vamp-mat-role-greeting
+        color: DarkRed
+        sound: "/Audio/_LateStation/Ambience/Antag/vamp_greet.ogg"
+      startingGear: VampMatGear
+      components:
+      - type: Vampire
+      - type: VampireMatriarch
+      mindRoles:
+      - MindRoleVampireMatriarch
