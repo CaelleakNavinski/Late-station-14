@@ -6,6 +6,6 @@
       announcement: alert-level-silver-announcement
       sound: /Audio/Misc/notice1.ogg
       color: Silver
-      emergencyLightColor: Silver
+      emergencyLightColor: LightGray
       forceEnableEmergencyLights: true
       shuttleTime: 600
