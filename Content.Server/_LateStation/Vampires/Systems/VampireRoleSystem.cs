@@ -102,7 +102,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                 return;
 
             // Force Violet without default broadcast
-            _alertLevelSystem.SetLevel(station.Value, "Silver", playSound: true, announce: false, force: true);
+            _alertLevelSystem.SetLevel(station.Value, "Silver", playSound: true, announce: true, force: true);
 
             // Custom station announcement
             const string warning =
