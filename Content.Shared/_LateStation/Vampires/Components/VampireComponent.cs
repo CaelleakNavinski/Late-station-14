@@ -1,27 +1,24 @@
-using Content.Shared.Antag;
 using Content.Shared.StatusIcon;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
+using Robust.Shared.GameObjects;
 
 namespace Content.Shared._LateStation.Vampires.Components
 {
-    /// <summary>
-    /// Marks an entity as a full vampire.
-    /// Plays a sound on conversion and displays a faction icon.
-    /// </summary>
     [RegisterComponent]
     [NetworkedComponent]
-    [Access(typeof(Content.Shared._LateStation.Vampires.Systems.SharedVampireSystem))]
+    [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireComponent : Component
     {
-        [DataField, ViewVariables(VVAccess.ReadWrite)]
+        [ViewVariables(VVAccess.ReadWrite)]
+        [DataField("statusIcon")]
         public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
 
-        [DataField]
-        public SoundSpecifier VampireStartSound { get; set; }
-            = new SoundPathSpecifier("/Audio/Antag/vamp_greeting.ogg");
+        [DataField("vampStartSound")]
+        public SoundSpecifier VampireStartSound { get; set; } = new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
 
         public override bool SessionSpecific => true;
     }
