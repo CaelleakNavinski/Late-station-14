@@ -1,20 +1,16 @@
+using System;
 using Content.Server.Actions;
-using Content.Server.Chat.Systems;
 using Content.Server.Station.Systems;
-using Content.Server._LateStation.Vampires.Components;
+using Content.Server.Chat.Systems;
 using Content.Shared.Mind;
-using Content.Shared.Vampire.Components;
-using Robust.Server.GameObjects;
+using Content.Shared._LateStation.Vampires.Components;
 using Robust.Server.Player;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
+using Robust.Shared.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
-    /// <summary>
-    /// Assigns and removes vampire roles (regular & Matriarch),
-    /// enforces a cap on total vampires, and raises Violet alert when cap is reached.
-    /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
         [Dependency] private readonly ActionSystem _actionSystem = default!;
@@ -26,8 +22,6 @@ namespace Content.Server._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
-
-            // Listen for mind‐role assignments and removals
             SubscribeLocalEvent<MindAddedMessage>(OnMindAdded);
             SubscribeLocalEvent<MindRemovedMessage>(OnMindRemoved);
         }
@@ -40,7 +34,6 @@ namespace Content.Server._LateStation.Vampires.Systems
                     GrantVampire(uid);
                     TryTriggerVioletAlert(uid);
                     break;
-
                 case "MindRoleVampireMatriarch":
                     if (!EntityManager.HasComponent<VampireMatriarchComponent>(uid))
                         EntityManager.AddComponent<VampireMatriarchComponent>(uid);
@@ -51,11 +44,10 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void OnMindRemoved(EntityUid uid, MindRemovedMessage msg)
         {
             switch (msg.MindRole)
-            {<=
+            {
                 case "MindRoleVampire":
                     RemoveVampire(uid);
                     break;
-
                 case "MindRoleVampireMatriarch":
                     if (EntityManager.HasComponent<VampireMatriarchComponent>(uid))
                         EntityManager.RemoveComponent<VampireMatriarchComponent>(uid);
@@ -63,9 +55,6 @@ namespace Content.Server._LateStation.Vampires.Systems
             }
         }
 
-        /// <summary>
-        /// Adds the VampireComponent and bite action to a new vampire.
-        /// </summary>
         private void GrantVampire(EntityUid uid)
         {
             if (!EntityManager.HasComponent<VampireComponent>(uid))
@@ -74,9 +63,6 @@ namespace Content.Server._LateStation.Vampires.Systems
             _actionSystem.AddAction(uid, "ActionVampireBite");
         }
 
-        /// <summary>
-        /// Removes the VampireComponent and bite action from an entity.
-        /// </summary>
         private void RemoveVampire(EntityUid uid)
         {
             if (EntityManager.HasComponent<VampireComponent>(uid))
@@ -85,23 +71,15 @@ namespace Content.Server._LateStation.Vampires.Systems
             _actionSystem.RemoveAction(uid, "ActionVampireBite");
         }
 
-        /// <summary>
-        /// When the vampire count reaches the cap (max(3, 20% of players)),
-        /// raises station alert to Violet and announces.
-        /// </summary>
         private void TryTriggerVioletAlert(EntityUid uid)
         {
-            var totalVamps = EntityQuery<VampireComponent>().Count();
-            var cap = Math.Max(3, (int) Math.Ceiling(_playerManager.PlayerCount * 0.2f));
-
-            if (totalVamps <= cap)
-                return;
+            var total = EntityQuery<VampireComponent>().Count();
+            var cap = Math.Max(3, (int)Math.Ceiling(_playerManager.PlayerCount * 0.2f));
+            if (total != cap) return;
 
             var station = _stationSystem.GetOwningStation(uid);
-            if (station == null)
-                return;
+            if (station == null) return;
 
-            // Force Violet without default broadcast
             _alertLevelSystem.SetLevel(station.Value, "Silver", playSound: true, announce: true, force: true);
 
             // Custom station announcement
