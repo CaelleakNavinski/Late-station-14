@@ -1,9 +1,9 @@
-using Content.Shared.Popups;                           // SharedPopupSystem lives here
-using Content.Shared._LateStation.Vampires.Components; // VampireInfectionComponent, VampireComponent
-using Content.Shared._LateStation.Vampires.Events;     // VampireBiteActionEvent
-using Content.Shared.Humanoid;                         // HumanoidComponent
-using Robust.Shared.GameStates;                        // [Dependency], EntitySystem
-using Robust.Server.GameObjects;                       // EntityManager.Resolve…
+using Content.Shared.Popups;
+using Content.Shared._LateStation.Vampires.Components;
+using Content.Shared._LateStation.Vampires.Events;
+using Content.Shared.Humanoid;          // ← required for HumanoidComponent
+using Robust.Shared.GameStates;
+using Robust.Server.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -21,18 +21,27 @@ namespace Content.Server._LateStation.Vampires.Systems
             var user = ev.Performer;
             var target = ev.Target;
 
+            // Only humanoids can be bitten
             if (!EntityManager.HasComponent<HumanoidComponent>(target))
                 return;
+
+            // Already infected or already a vampire?
             if (EntityManager.HasComponent<VampireInfectionComponent>(target) ||
                 EntityManager.HasComponent<VampireComponent>(target))
                 return;
 
+            // Begin infection
             EntityManager.AddComponent<VampireInfectionComponent>(target);
+
+            // Popup flavor text
+            var name = EntityManager.GetComponent<MetaDataComponent>(target).EntityName;
             _popup.PopupEntity(
-                ev.PopupText.Replace("{Victim}", 
-                    EntityManager.GetComponent<MetaDataComponent>(target).EntityName),
+                ev.PopupText.Replace("{Victim}", name),
                 target,
-                PopupType.LargeCaution);
+                PopupType.LargeCaution
+            );
+
+            // Disarm the bite-toggle
             EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
         }
     }
