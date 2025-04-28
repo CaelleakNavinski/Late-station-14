@@ -1,13 +1,14 @@
 using System;
-using Content.Server.Actions;
-using Content.Server.Station.Systems;
-using Content.Server.Chat.Systems;
-using Content.Shared.Mind;
-using Content.Shared._LateStation.Vampires.Components;
-using Robust.Server.Player;
-using Robust.Shared.GameStates;
-using Robust.Shared.IoC;
-using Robust.Shared.GameObjects;
+using Content.Server.Actions;                          // ActionSystem
+using Content.Server.AlertLevel;                       // AlertLevelSystem
+using Content.Server.Station.Systems;                  // StationSystem
+using Content.Server.Chat.Systems;                     // ChatSystem
+using Content.Shared.Mind;                              // MindAddedMessage/MindRemovedMessage
+using Content.Shared._LateStation.Vampires.Components; // VampireComponent, VampireMatriarchComponent
+using Robust.Server.Player;                            // IPlayerManager
+using Robust.Shared.GameStates;                        // EntitySystem
+using Robust.Shared.IoC;                               // [Dependency]
+using Robust.Shared.GameObjects;                       // EntityQuery<T>
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -21,7 +22,6 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         public override void Initialize()
         {
-            base.Initialize();
             SubscribeLocalEvent<MindAddedMessage>(OnMindAdded);
             SubscribeLocalEvent<MindRemovedMessage>(OnMindRemoved);
         }
@@ -59,7 +59,6 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             if (!EntityManager.HasComponent<VampireComponent>(uid))
                 EntityManager.AddComponent<VampireComponent>(uid);
-
             _actionSystem.AddAction(uid, "ActionVampireBite");
         }
 
@@ -67,11 +66,10 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             if (EntityManager.HasComponent<VampireComponent>(uid))
                 EntityManager.RemoveComponent<VampireComponent>(uid);
-
             _actionSystem.RemoveAction(uid, "ActionVampireBite");
         }
 
-        private void TryTriggerVioletAlert(EntityUid uid)
+        private void TryTriggerSilverAlert(EntityUid uid)
         {
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_playerManager.PlayerCount * 0.2f));
@@ -90,7 +88,6 @@ namespace Content.Server._LateStation.Vampires.Systems
                 warning,
                 playDefaultSound: true,
                 sender: "Central Command Supernatural Affairs"
-            );
         }
     }
 }
