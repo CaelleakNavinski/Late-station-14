@@ -1,12 +1,10 @@
 using System;
-using Content.Server.StatusEffects;
-using Content.Shared.StatusEffects;
-using Content.Shared.Popups;
-using Content.Shared._LateStation.Vampires.Components;
-using Robust.Shared.GameStates;
-using Robust.Shared.Timing;
-using Robust.Shared.GameObjects;
-using Content.Server.Faction;
+using Content.Shared.StatusEffect;                     // StatusEffectsSystem
+using Content.Shared.Popups;                           // SharedPopupSystem (if you need popups here too)
+using Content.Shared._LateStation.Vampires.Components; // VampireInfectionComponent
+using Robust.Shared.GameStates;                        // [Dependency], EntitySystem
+using Robust.Shared.Timing;                            // frameTime
+using Robust.Shared.GameObjects;                       // EntityQueryEnumerator
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -14,7 +12,6 @@ namespace Content.Server._LateStation.Vampires.Systems
     {
         [Dependency] private readonly StatusEffectsSystem _status = default!;
         [Dependency] private readonly SharedPopupSystem _popup = default!;
-        [Dependency] private readonly FactionSystem _faction = default!;
 
         public override void Update(float frameTime)
         {
@@ -36,7 +33,6 @@ namespace Content.Server._LateStation.Vampires.Systems
                 {
                     EntityManager.RemoveComponent<VampireInfectionComponent>(comp.Owner);
                     EntityManager.AddComponent<VampireComponent>(comp.Owner);
-                    _faction.SetFaction(comp.Owner, "VampireFaction");
                 }
             }
         }
