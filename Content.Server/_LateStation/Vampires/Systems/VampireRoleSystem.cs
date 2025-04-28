@@ -1,20 +1,21 @@
 using System;
-using Content.Server.Actions;                           // ActionSystem
-using Content.Server.AlertLevel;                        // AlertLevelSystem
-using Content.Server.Station.Systems;                   // StationSystem
-using Content.Server.Chat.Systems;                      // ChatSystem
-using Content.Shared.Mind;                              // MindAddedMessage/MindRemovedMessage
-using Content.Shared._LateStation.Vampires.Components;  // VampireComponent, VampireMatriarchComponent
-using Robust.Server.Player;                             // IPlayerManager
-using Robust.Shared.GameStates;                         // EntitySystem
-using Robust.Shared.IoC;                                // [Dependency]
-using Robust.Shared.GameObjects;                        // EntityQuery<T>
+using Content.Server.Actions;                            // ActionsSystem
+using Content.Server.AlertLevel;                         // AlertLevelSystem
+using Content.Server.Station.Systems;                    // StationSystem
+using Content.Server.Chat.Systems;                       // ChatSystem
+using Content.Shared.Mind;                               // MindAddedMessage/MindRemovedMessage
+using Content.Shared.Mind.Components;                    // Needed for MindAddedMessage, MindRemovedMessage
+using Content.Shared._LateStation.Vampires.Components;   // VampireComponent, VampireMatriarchComponent
+using Robust.Server.Player;                              // IPlayerManager
+using Robust.Shared.GameStates;                          // EntitySystem
+using Robust.Shared.IoC;                                 // [Dependency]
+using Robust.Shared.GameObjects;                         // EntityQuery<T>
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     public sealed class VampireRoleSystem : EntitySystem
     {
-        [Dependency] private readonly ActionSystem _actionSystem = default!;
+        [Dependency] private readonly ActionsSystem _actions = default!;           // Renamed
         [Dependency] private readonly IPlayerManager _playerManager = default!;
         [Dependency] private readonly AlertLevelSystem _alertLevelSystem = default!;
         [Dependency] private readonly StationSystem _stationSystem = default!;
@@ -62,7 +63,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (!EntityManager.HasComponent<VampireComponent>(uid))
                 EntityManager.AddComponent<VampireComponent>(uid);
 
-            _actionSystem.AddAction(uid, "ActionVampireBite");
+            _actions.AddAction(uid, "ActionVampireBite");
         }
 
         private void RemoveVampire(EntityUid uid)
@@ -70,7 +71,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (EntityManager.HasComponent<VampireComponent>(uid))
                 EntityManager.RemoveComponent<VampireComponent>(uid);
 
-            _actionSystem.RemoveAction(uid, "ActionVampireBite");
+            _actions.RemoveAction(uid, "ActionVampireBite");
         }
 
         private void TryTriggerSilverAlert(EntityUid uid)
@@ -97,6 +98,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Scans have detected a significant escalation in vampiric activity aboard the station. " +
                 "Remain within your respective departments and report any suspicious behavior to Security or the Chaplain. " +
                 "Avoid isolated areas and travel in groups when possible.";
+
             _chatSystem.DispatchStationAnnouncement(
                 station.Value,
                 warning,
