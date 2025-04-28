@@ -1,0 +1,104 @@
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatBlackBeanie
+  name: Black Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/blackbeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/blackbeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatBlueBeanie
+  name: Blue Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/bluebeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/bluebeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatGreenBeanie
+  name: Green Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/greenbeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/greenbeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatGreyBeanie
+  name: Grey Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/greybeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/greybeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatPurpleBeanie
+  name: Purple Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/purplebeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/purplebeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatRedBeanie
+  name: Red Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/redbeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/redbeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7
+
+- type: entity
+  parent: ClothingHeadBase
+  id: ClothingHeadHatYellowBeanie
+  name: Yellow Beanie
+  description: Best head piece for your usual suspects.
+  components:
+  - type: Sprite
+    sprite: _LateStation/Clothing/Head/yellowbeanie.rsi
+  - type: Clothing
+    sprite: _LateStation/Clothing/Head/yellowbeanie.rsi
+  - type: TemperatureProtection
+    heatingCoefficient: 1.025
+    # The beanie is not a good insulator, but it does help a bit.
+    coolingCoefficient: 0.7

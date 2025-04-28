@@ -1,6 +1,13 @@
 - type: vendingMachineInventory
   id: WinterDrobeInventory
   startingInventory:
+    ClothingHeadHatBlackBeanie: 3 ## Latestation
+    ClothingHeadHatBlueBeanie: 3 ## Latestation
+    ClothingHeadHatGreenBeanie: 3 ## Latestation
+    ClothingHeadHatGreyBeanie: 3 ## Latestation
+    ClothingHeadHatPurpleBeanie: 3 ## Latestation
+    ClothingHeadHatRedBeanie: 3 ## Latestation
+    ClothingHeadHatYellowBeanie: 3 ## Latestation
     ClothingNeckScarfStripedRed: 3
     ClothingNeckScarfStripedGreen: 3
     ClothingNeckScarfStripedBlue: 3
