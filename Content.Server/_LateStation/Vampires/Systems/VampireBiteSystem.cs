@@ -1,9 +1,9 @@
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
-using Content.Shared.Humanoid;          // ← required for HumanoidComponent
-using Robust.Shared.GameStates;
-using Robust.Server.GameObjects;
+using Content.Shared.Humanoid;         // ← bring in HumanoidComponent
+using Robust.Shared.GameStates;       // EntitySystem
+using Robust.Server.GameObjects;      // EntityManager, SharedPopupSystem
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -21,27 +21,26 @@ namespace Content.Server._LateStation.Vampires.Systems
             var user = ev.Performer;
             var target = ev.Target;
 
-            // Only humanoids can be bitten
+            // Only humanoids
             if (!EntityManager.HasComponent<HumanoidComponent>(target))
                 return;
 
-            // Already infected or already a vampire?
+            // Already infected or already vampire?
             if (EntityManager.HasComponent<VampireInfectionComponent>(target) ||
                 EntityManager.HasComponent<VampireComponent>(target))
                 return;
 
-            // Begin infection
+            // Start infection
             EntityManager.AddComponent<VampireInfectionComponent>(target);
 
-            // Popup flavor text
+            // Flavor popup
             var name = EntityManager.GetComponent<MetaDataComponent>(target).EntityName;
             _popup.PopupEntity(
                 ev.PopupText.Replace("{Victim}", name),
                 target,
-                PopupType.LargeCaution
-            );
+                PopupType.LargeCaution);
 
-            // Disarm the bite-toggle
+            // Disarm the bite toggle on the user
             EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
         }
     }
