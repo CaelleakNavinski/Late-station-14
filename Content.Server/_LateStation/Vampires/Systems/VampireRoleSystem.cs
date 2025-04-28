@@ -1,82 +1,92 @@
+using System;
 using System.Linq;
-using Content.Server.Actions;                             // ← ActionsSystem
-using Content.Server.AlertLevel;                          // ← AlertLevelSystem
-using Content.Server.Station.Systems;                     // ← StationSystem
-using Content.Server.Chat.Systems;                        // ← ChatSystem
-using Content.Shared.Mind;                                // ← MindAddedMessage / MindRemovedMessage
-using Content.Shared.Mind.Components;                      // ← MindContainerComponent
-using Content.Shared._LateStation.Vampires.Components;
-using Robust.Server.Player;                               // ← IPlayerManager
-using Robust.Shared.GameStates;                           // ← EntitySystem
-using Robust.Shared.IoC;                                  // ← [Dependency]
-using Robust.Shared.GameObjects;                          // ← EntityQuery<T>
+using Content.Server.Actions;                           // ActionsSystem
+using Content.Server.AlertLevel;                        // AlertLevelSystem
+using Content.Server.Station.Systems;                   // StationSystem
+using Content.Server.Chat.Systems;                      // ChatSystem
+using Content.Shared._LateStation.Vampires.Components;  // VampireComponent, VampireMatriarchComponent
+using Robust.Server.Player;                             // IPlayerManager
+using Robust.Shared.GameStates;                         // EntitySystem, ComponentInit, ComponentShutdown
+using Robust.Shared.IoC;                                // [Dependency]
+using Robust.Shared.GameObjects;                        // SubscribeLocalEvent
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
+    /// <summary>
+    /// Adds/removes the bite action when VampireComponent is added/removed,
+    /// enforces the silver-alert cap when vampires spawn,
+    /// and reserves a spot for Matriarch hooks later.
+    /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
         [Dependency] private readonly ActionsSystem _actions = default!;
-        [Dependency] private readonly IPlayerManager _playerManager = default!;
-        [Dependency] private readonly AlertLevelSystem _alertLevelSystem = default!;
-        [Dependency] private readonly StationSystem _stationSystem = default!;
-        [Dependency] private readonly ChatSystem _chatSystem = default!;
+        [Dependency] private readonly IPlayerManager _players = default!;
+        [Dependency] private readonly AlertLevelSystem _alerts = default!;
+        [Dependency] private readonly StationSystem _stations = default!;
+        [Dependency] private readonly ChatSystem _chat = default!;
 
         public override void Initialize()
         {
-            // Hook into when a Mind is added/removed on any body
-            SubscribeLocalEvent<MindContainerComponent, MindAddedMessage>(OnMindAdded);
-            SubscribeLocalEvent<MindContainerComponent, MindRemovedMessage>(OnMindRemoved);
+            base.Initialize();
+
+            // Standard vampires gain/lose bite action when the component appears/disappears:
+            SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
+            SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
+
+            // Matriarch is just a marker for now:
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(OnMatriarchInit);
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(OnMatriarchShutdown);
         }
 
-        private void OnMindAdded(EntityUid uid, MindContainerComponent comp, MindAddedMessage args)
+        private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // If the Mind just gained a VampireComponent on its OwnedEntity, equip them:
-            if (comp.Mind?.OwnedEntity is { } owned && EntityManager.HasComponent<VampireComponent>(owned))
-            {
-                _actions.AddAction(owned, "ActionVampireBite");
-                TryTriggerSilverAlert(owned);
-            }
+            // Give them the Bite toggle
+            _actions.AddAction(uid, "ActionVampireBite");
 
-            // If they gained the Matriarch role component, tag it:
-            if (comp.Mind?.OwnedEntity is { } own2 && EntityManager.HasComponent<VampireMatriarchComponent>(own2))
-            {
-                // marker only—no abilities yet
-            }
+            // Check cap: max(3, 20% of players)
+            var total = EntityQuery<VampireComponent>().Count();
+            var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
+            if (total == cap)
+                TriggerSilverAlert(uid);
         }
 
-        private void OnMindRemoved(EntityUid uid, MindContainerComponent comp, MindRemovedMessage args)
+        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            // If they lost VampireComponent, strip bite
-            if (comp.Mind?.OwnedEntity is { } owned && !EntityManager.HasComponent<VampireComponent>(owned))
-            {
-                _actions.RemoveAction(owned, "ActionVampireBite");
-            }
+            _actions.RemoveAction(uid, "ActionVampireBite");
         }
 
-        private void TryTriggerSilverAlert(EntityUid uid)
+        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
         {
-            var totalVamps = EntityQuery<VampireComponent>().Count();
-            var cap = Math.Max(3, (int)Math.Ceiling(_playerManager.PlayerCount * 0.2f));
-            if (totalVamps != cap) return;
+            // Marker only—future power hooks go here.
+        }
 
-            var station = _stationSystem.GetOwningStation(uid);
-            if (station == null) return;
+        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
+        {
+            // Cleanup for future hooks.
+        }
 
-            _alertLevelSystem.SetLevel(
+        private void TriggerSilverAlert(EntityUid uid)
+        {
+            var station = _stations.GetOwningStation(uid);
+            if (station == null)
+                return;
+
+            // Raise to Silver, making the announcement
+            _alerts.SetLevel(
                 station.Value,
                 "Silver",
                 playSound: true,
                 announce: true,
                 force: true);
 
-            const string warning =
+            const string msg =
                 "Scans have detected a significant escalation in vampiric activity aboard the station. " +
-                "Remain within your respective departments and report any suspicious behavior to Security or the Chaplain. " +
+                "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
                 "Avoid isolated areas and travel in groups when possible.";
 
-            _chatSystem.DispatchStationAnnouncement(
+            _chat.DispatchStationAnnouncement(
                 station.Value,
-                warning,
+                msg,
                 "Central Command Supernatural Affairs",
                 playDefaultSound: true);
         }
