@@ -86,8 +86,8 @@ namespace Content.Server._LateStation.Vampires.Systems
             _chatSystem.DispatchStationAnnouncement(
                 station.Value,
                 warning,
-                playDefaultSound: true,
                 sender: "Central Command Supernatural Affairs"
+                playDefaultSound: true,
         }
     }
 }
