@@ -1,14 +1,12 @@
-using Robust.Shared.GameStates;
-using Robust.Shared.IoC;
+using Robust.Shared.GameObjects;
 
 namespace Content.Shared._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Shared stub for vampire logic (used by Access attributes).
+    /// Shared system marker for vampire access attributes.
     /// </summary>
-    [Virtual]
     public sealed class SharedVampireSystem : EntitySystem
     {
-        // Intentionally empty: shared logic can be added here.
+        // No shared logic yet.
     }
 }
