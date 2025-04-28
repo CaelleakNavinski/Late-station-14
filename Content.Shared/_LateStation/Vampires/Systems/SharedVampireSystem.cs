@@ -7,6 +7,6 @@ namespace Content.Shared._LateStation.Vampires.Systems
     /// </summary>
     public sealed class SharedVampireSystem : EntitySystem
     {
-        // No shared logic yet.
+        // Intentionally empty.
     }
 }
