@@ -5,7 +5,6 @@ using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.GameStates;
 using Robust.Shared.Timing;
 using Robust.Shared.GameObjects;
-using Content.Server.Faction;                    // ← FactionSystem
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -13,7 +12,6 @@ namespace Content.Server._LateStation.Vampires.Systems
     {
         [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
         [Dependency] private readonly SharedPopupSystem _popup = default!;
-        [Dependency] private readonly FactionSystem _faction = default!;
 
         public override void Update(float frameTime)
         {
@@ -46,7 +44,6 @@ namespace Content.Server._LateStation.Vampires.Systems
                 {
                     EntityManager.RemoveComponent<VampireInfectionComponent>(comp.Owner);
                     EntityManager.AddComponent<VampireComponent>(comp.Owner);
-                    _faction.SetFaction(comp.Owner, "VampireFaction");
                 }
             }
         }
