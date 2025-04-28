@@ -1,9 +1,9 @@
-using Content.Server.Popups;
-using Content.Shared._LateStation.Vampires.Components;
-using Content.Shared._LateStation.Vampires.Events;
-using Content.Shared.Humanoid;
-using Robust.Shared.GameStates;
-using Robust.Server.GameObjects;
+using Content.Shared.Popups;                           // SharedPopupSystem lives here
+using Content.Shared._LateStation.Vampires.Components; // VampireInfectionComponent, VampireComponent
+using Content.Shared._LateStation.Vampires.Events;     // VampireBiteActionEvent
+using Content.Shared.Humanoid;                         // HumanoidComponent
+using Robust.Shared.GameStates;                        // [Dependency], EntitySystem
+using Robust.Server.GameObjects;                       // EntityManager.Resolve…
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -13,7 +13,6 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         public override void Initialize()
         {
-            base.Initialize();
             SubscribeLocalEvent<VampireBiteActionEvent>(OnBite);
         }
 
@@ -30,7 +29,8 @@ namespace Content.Server._LateStation.Vampires.Systems
 
             EntityManager.AddComponent<VampireInfectionComponent>(target);
             _popup.PopupEntity(
-                ev.PopupText.Replace("{Victim}", EntityManager.GetComponent<MetaDataComponent>(target).EntityName),
+                ev.PopupText.Replace("{Victim}", 
+                    EntityManager.GetComponent<MetaDataComponent>(target).EntityName),
                 target,
                 PopupType.LargeCaution);
             EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
