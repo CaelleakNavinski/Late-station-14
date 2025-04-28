@@ -1,10 +1,12 @@
 using Robust.Shared.GameStates;
+using Robust.Shared.GameObjects;
 
-namespace Content.Shared.Vampire.Components
+namespace Content.Shared._LateStation.Vampires.Components
 {
-    [RegisterComponent, NetworkedComponent]
-    public sealed class VampireBiteToggleComponent : Component
+    [RegisterComponent]
+    [NetworkedComponent]
+    public sealed partial class VampireBiteToggleComponent : Component
     {
-        // This component has no data—its mere presence means “bite is armed.”
+        // Arms the bite action
     }
 }
