@@ -24,7 +24,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             var target = ev.Target;
 
             // Only humanoids
-            if (!EntityManager.HadComponent<HumanoidAppearanceComponent>(uid))
+            if (!EntityManager.HasComponent<HumanoidAppearanceComponent>(target))
                 return;
 
             // Already infected or already a vampire?
