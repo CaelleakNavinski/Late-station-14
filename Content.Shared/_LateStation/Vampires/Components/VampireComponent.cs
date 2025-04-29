@@ -39,7 +39,9 @@ namespace Content.Shared._LateStation.Vampires.Components
         /// Stores the action entity created so we can remove it cleanly later.
         /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
-        public EntityUid? BiteActionEntity { get; set; }
+        [DataField("biteActionEntity")]
+        [AutoNetworkedField]
+        public EntityUid? BiteActionEntity;
 
         public override bool SessionSpecific => true;
     }
