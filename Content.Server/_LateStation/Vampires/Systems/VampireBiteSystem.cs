@@ -1,10 +1,11 @@
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
-using Content.Shared.Humanoid;    
-using Robust.Shared.GameStates;              // EntitySystem
-using Robust.Server.GameObjects;             // EntityManager
-using Robust.Shared.IoC;                     // [Dependency]
+using Content.Shared.Humanoid;            // for HumanoidComponent
+using Content.Shared.Actions;             // for ActionsComponent (if needed)
+using Robust.Shared.GameStates;           // EntitySystem
+using Robust.Server.GameObjects;          // EntityManager, SharedPopupSystem
+using Robust.Shared.IoC;                  // [Dependency]
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -24,9 +25,9 @@ namespace Content.Server._LateStation.Vampires.Systems
 
             // Only humanoids
             if (!EntityManager.HadComponent<HumanoidAppearanceComponent>(uid))
-            return;
+                return;
 
-            // Already infected or already vampire?
+            // Already infected or already a vampire?
             if (EntityManager.HasComponent<VampireInfectionComponent>(target) ||
                 EntityManager.HasComponent<VampireComponent>(target))
                 return;
@@ -41,8 +42,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                 target,
                 PopupType.LargeCaution);
 
-            // Disarm the bite toggle on the user
-            EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
+            // Optionally, you could also remove the toggle from the user here
+            // But bite removal is handled by VampireComponent shutdown in VampireRoleSystem
         }
     }
 }
