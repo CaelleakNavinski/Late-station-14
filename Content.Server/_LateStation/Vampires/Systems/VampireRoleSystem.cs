@@ -1,19 +1,18 @@
 using System.Linq;
-using Content.Server.Actions;                           // ActionsSystem
-using Content.Server.AlertLevel;                        // AlertLevelSystem
-using Content.Server.Station.Systems;                   // StationSystem
-using Content.Server.Chat.Systems;                      // ChatSystem
-using Content.Shared._LateStation.Vampires.Components;  // VampireComponent, VampireMatriarchComponent
-using Robust.Server.Player;                             // IPlayerManager
-using Robust.Shared.GameStates;                         // EntitySystem, ComponentInit, ComponentShutdown
-using Robust.Shared.IoC;                                // [Dependency]
-using Robust.Shared.GameObjects;                        // EntityQuery
+using Content.Server.Actions;                          // ActionsSystem
+using Content.Server.AlertLevel;                       // AlertLevelSystem
+using Content.Server.Station.Systems;                  // StationSystem
+using Content.Server.Chat.Systems;                     // ChatSystem
+using Content.Shared._LateStation.Vampires.Components; // VampireComponent, VampireMatriarchComponent
+using Robust.Server.Player;                            // IPlayerManager
+using Robust.Shared.GameStates;                        // EntitySystem, ComponentInit, ComponentShutdown
+using Robust.Shared.IoC;                               // [Dependency]
+using Robust.Shared.GameObjects;                       // EntityQuery
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Handles giving/removing the Bite action on VampireComponent appearance,
-    /// and triggers the Silver alert at the 20% / min-3 cap.
+    /// Manages bite-action granting and Silver-alert triggering based on VampireComponent.
     /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
@@ -27,13 +26,15 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             base.Initialize();
 
-            // When any VampireComponent is added / removed:
+            // Give / remove bite when VampireComponent is added/removed.
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
 
-            // Matriarch hooks reserved (no abilities yet)
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(_ => { });
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(_ => { });
+            // Reserve Matriarch hooks (empty handlers with correct signature).
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(
+                (uid, comp, args) => { /* future leader abilities */ });
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(
+                (uid, comp, args) => { /* cleanup */ });
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
@@ -58,7 +59,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (station == null)
                 return;
 
-            // Raise to Silver, with announcement & sound
+            // Raise to Silver with announcement & sound
             _alerts.SetLevel(
                 station.Value,
                 "Silver",
@@ -71,10 +72,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
                 "Avoid isolated areas and travel in groups when possible.";
 
-            // Must pass null for the 'target' parameter
             _chat.DispatchStationAnnouncement(
                 station.Value,
-                null,
                 msg,
                 "Central Command Supernatural Affairs",
                 playDefaultSound: true);
