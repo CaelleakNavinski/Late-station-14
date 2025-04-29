@@ -1,18 +1,19 @@
 using System.Linq;
-using Content.Server.Actions;                          // ActionsSystem
-using Content.Server.AlertLevel;                       // AlertLevelSystem
-using Content.Server.Station.Systems;                  // StationSystem
-using Content.Server.Chat.Systems;                     // ChatSystem
-using Content.Shared._LateStation.Vampires.Components; // VampireComponent, VampireMatriarchComponent
-using Robust.Server.Player;                            // IPlayerManager
-using Robust.Shared.GameStates;                        // EntitySystem, ComponentInit, ComponentShutdown
-using Robust.Shared.IoC;                               // [Dependency]
-using Robust.Shared.GameObjects;                       // EntityQuery
+using Content.Server.AlertLevel;                          // AlertLevelSystem
+using Content.Server.Actions;                             // ActionsSystem
+using Content.Server.Station.Systems;                     // StationSystem
+using Content.Server.Chat.Systems;                        // ChatSystem
+using Content.Shared._LateStation.Vampires.Components;    // VampireComponent, VampireMatriarchComponent
+using Content.Shared.Actions;                             // ActionsComponent
+using Robust.Server.Player;                               // IPlayerManager
+using Robust.Shared.GameStates;                           // EntitySystem, ComponentInit, ComponentShutdown
+using Robust.Shared.IoC;                                  // [Dependency]
+using Robust.Shared.GameObjects;                          // SubscribeLocalEvent, EntityQuery
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Manages bite-action granting and Silver-alert triggering based on VampireComponent.
+    /// Manages giving/removing the bite action and triggers Silver alert at cap.
     /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
@@ -25,31 +26,25 @@ namespace Content.Server._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
-
-            // Give / remove bite when VampireComponent is added/removed.
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
-
-            // Reserve Matriarch hooks (empty handlers with correct signature).
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(
-                (uid, comp, args) => { /* future leader abilities */ });
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(
-                (uid, comp, args) => { /* cleanup */ });
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>((_, _, _) => { });
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>((_, _, _) => { });
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // Ensure the entity has an ActionsComponent
+            // Ensure we have an ActionsComponent to attach to
             if (!TryComp<ActionsComponent>(uid, out var actionsComp))
                 return;
 
-            // Add the bite action by reference
+            // Add the bite action and store the entity reference
             _actions.AddAction(uid,
-                ref comp.BiteActionEntity,           // stores the created action-entity
-                comp.BiteActionPrototype,           // prototype ID
+                ref comp.BiteActionEntity,
+                comp.BiteActionPrototype,
                 component: actionsComp);
 
-            // Cap check...
+            // Cap check: max(3, 20% of players)
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
             if (total == cap)
@@ -58,9 +53,9 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            // If we previously stored an action reference, remove it
-            if (comp.BiteActionEntity != null
-                && TryComp<ActionsComponent>(uid, out var actionsComp))
+            // Remove the bite action if we added it
+            if (comp.BiteActionEntity != null &&
+                TryComp<ActionsComponent>(uid, out var actionsComp))
             {
                 _actions.RemoveAction(uid,
                     comp.BiteActionEntity.Value,
