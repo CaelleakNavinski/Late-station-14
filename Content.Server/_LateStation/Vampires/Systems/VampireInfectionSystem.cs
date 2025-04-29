@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.GameStates;
@@ -14,25 +13,25 @@ namespace Content.Server._LateStation.Vampires.Systems
     {
         private static readonly string[] TurningMessages =
         {
-            "“Feed..."",
-            "“Their blood calls...”",
-            "“Embrace the darkness...”",
-            "“The hunger wins soon...”",
-            "“Tick... tock...”",
-            "“Their pulse is your lullaby...”",
-            "“Their blood... it sings.”",
-            "“The void in your veins grows.”",
+            "Feed...",
+            "Their blood calls...",
+            "Embrace the darkness...",
+            "The hunger wins soon...",
+            "Tick... tock...",
+            "Their pulse is your lullaby...",
+            "Their blood... it sings.",
+            "The void in your veins grows."
         };
+
         // Final turn messages at fixed thresholds
-        private static readonly float[] FinalThresholds = { 10f, 8f, 6f, 4f, 2f, 0f };
+        private static readonly float[] FinalThresholds = { 10f, 8f, 6f, 4f, 2f };
         private static readonly string[] FinalMessages =
         {
-            "This is it...",
-            "No turning back...",
             "Your final heartbeat...",
-            "One... last... breath...",
             "You feel the last of your humanity slipping away...",
-            "Taste immortality."
+            "You cannot remember why you fought it...",
+            "You feel peace like you've never known...",
+            "You feel...",
         };
 
         [Dependency] private readonly SharedPopupSystem _popup = default!;
@@ -58,7 +57,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                 // Tick down
                 comp.TimeLeft = MathF.Max(0f, comp.TimeLeft - frameTime);
 
-                // ===== Randomized whispers between 45s and 10s =====
+                // ===== Random whispers between 45s and 10s =====
                 if (comp.TimeLeft <= 45f && comp.TimeLeft >= 10f)
                 {
                     comp.PopupAccumulator += frameTime;
@@ -68,7 +67,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                         if (_random.Prob(0.33f))
                         {
                             var msg = _random.Pick(TurningMessages);
-                            _popup.PopupEntity(msg, comp.Owner, comp.Owner, PopupType.SmallCaution);
+                            // Use the 3-arg overload so the viewer defaults to the target
+                            _popup.PopupEntity(msg, comp.Owner, PopupType.Medium);
                         }
                     }
                 }
@@ -78,9 +78,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                        && comp.PreviousTimeLeft > FinalThresholds[comp.FinalStage]
                        && comp.TimeLeft <= FinalThresholds[comp.FinalStage])
                 {
-                    // Show the final message for this stage
                     var finalMsg = FinalMessages[comp.FinalStage];
-                    _popup.PopupEntity(finalMsg, comp.Owner, comp.Owner, PopupType.MediumCaution);
+                    _popup.PopupEntity(finalMsg, comp.Owner, PopupType.MediumCaution);
                     comp.FinalStage++;
                 }
 
@@ -89,6 +88,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                 // ===== Conversion =====
                 if (comp.TimeLeft <= 0f)
                 {
+                    _popup.PopupEntity("THIRSTY.", comp.Owner, PopupType.LargeCaution);
                     EntityManager.RemoveComponent<VampireInfectionComponent>(comp.Owner);
                     EntityManager.AddComponent<VampireComponent>(comp.Owner);
                 }
