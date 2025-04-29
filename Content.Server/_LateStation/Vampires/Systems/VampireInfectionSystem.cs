@@ -23,7 +23,6 @@ namespace Content.Server._LateStation.Vampires.Systems
             "The void in your veins grows."
         };
 
-        // Final turn messages at fixed thresholds
         private static readonly float[] FinalThresholds = { 10f, 8f, 6f, 4f, 2f };
         private static readonly string[] FinalMessages =
         {
@@ -57,7 +56,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                 // Tick down
                 comp.TimeLeft = MathF.Max(0f, comp.TimeLeft - frameTime);
 
-                // ===== Random whispers between 45s and 10s =====
+                // Random whispers between 45s and 10s
                 if (comp.TimeLeft <= 45f && comp.TimeLeft >= 10f)
                 {
                     comp.PopupAccumulator += frameTime;
@@ -67,13 +66,12 @@ namespace Content.Server._LateStation.Vampires.Systems
                         if (_random.Prob(0.33f))
                         {
                             var msg = _random.Pick(TurningMessages);
-                            // Use the 3-arg overload so the viewer defaults to the target
                             _popup.PopupEntity(msg, comp.Owner, PopupType.Medium);
                         }
                     }
                 }
 
-                // ===== Final fixed messages at thresholds =====
+                // Final fixed messages at thresholds
                 while (comp.FinalStage < FinalThresholds.Length
                        && comp.PreviousTimeLeft > FinalThresholds[comp.FinalStage]
                        && comp.TimeLeft <= FinalThresholds[comp.FinalStage])
@@ -85,7 +83,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
                 comp.PreviousTimeLeft = comp.TimeLeft;
 
-                // ===== Conversion =====
+                // Conversion
                 if (comp.TimeLeft <= 0f)
                 {
                     _popup.PopupEntity("THIRSTY.", comp.Owner, PopupType.LargeCaution);
