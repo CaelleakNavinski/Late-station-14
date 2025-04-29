@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Content.Server.Actions;                           // ActionsSystem
 using Content.Server.AlertLevel;                        // AlertLevelSystem
@@ -8,14 +7,13 @@ using Content.Shared._LateStation.Vampires.Components;  // VampireComponent, Vam
 using Robust.Server.Player;                             // IPlayerManager
 using Robust.Shared.GameStates;                         // EntitySystem, ComponentInit, ComponentShutdown
 using Robust.Shared.IoC;                                // [Dependency]
-using Robust.Shared.GameObjects;                        // SubscribeLocalEvent
+using Robust.Shared.GameObjects;                        // EntityQuery
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Adds/removes the bite action when VampireComponent is added/removed,
-    /// enforces the silver-alert cap when vampires spawn,
-    /// and reserves a spot for Matriarch hooks later.
+    /// Handles giving/removing the Bite action on VampireComponent appearance,
+    /// and triggers the Silver alert at the 20% / min-3 cap.
     /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
@@ -29,21 +27,20 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             base.Initialize();
 
-            // Standard vampires gain/lose bite action when the component appears/disappears:
+            // When any VampireComponent is added / removed:
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
 
-            // Matriarch is just a marker for now:
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(OnMatriarchInit);
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(OnMatriarchShutdown);
+            // Matriarch hooks reserved (no abilities yet)
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(_ => { });
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(_ => { });
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // Give them the Bite toggle
             _actions.AddAction(uid, "ActionVampireBite");
 
-            // Check cap: max(3, 20% of players)
+            // Cap check: max(3, 20% of players)
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
             if (total == cap)
@@ -55,23 +52,13 @@ namespace Content.Server._LateStation.Vampires.Systems
             _actions.RemoveAction(uid, "ActionVampireBite");
         }
 
-        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
-        {
-            // Marker only—future power hooks go here.
-        }
-
-        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
-        {
-            // Cleanup for future hooks.
-        }
-
         private void TriggerSilverAlert(EntityUid uid)
         {
             var station = _stations.GetOwningStation(uid);
             if (station == null)
                 return;
 
-            // Raise to Silver, making the announcement
+            // Raise to Silver, with announcement & sound
             _alerts.SetLevel(
                 station.Value,
                 "Silver",
@@ -84,8 +71,10 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
                 "Avoid isolated areas and travel in groups when possible.";
 
+            // Must pass null for the 'target' parameter
             _chat.DispatchStationAnnouncement(
                 station.Value,
+                null,
                 msg,
                 "Central Command Supernatural Affairs",
                 playDefaultSound: true);
