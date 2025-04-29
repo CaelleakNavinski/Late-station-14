@@ -34,15 +34,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // Ensure we have an ActionsComponent to attach to
-            if (!TryComp<ActionsComponent>(uid, out var actionsComp))
-                return;
-
-            // Add the bite action and store the entity reference
-            _actions.AddAction(uid,
-                ref comp.BiteActionEntity,
-                comp.BiteActionPrototype,
-                component: actionsComp);
+            _actions.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
 
             // Cap check: max(3, 20% of players)
             var total = EntityQuery<VampireComponent>().Count();
@@ -53,16 +45,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            // Remove the bite action if we added it
-            if (comp.BiteActionEntity != null &&
-                TryComp<ActionsComponent>(uid, out var actionsComp))
-            {
-                _actions.RemoveAction(uid,
-                    comp.BiteActionEntity.Value,
-                    actionsComp);
-
-                comp.BiteActionEntity = null;
-            }
+            _actions.RemoveAction(uid, ref comp.BiteActionEntity);
         }
 
         private void TriggerSilverAlert(EntityUid uid)
