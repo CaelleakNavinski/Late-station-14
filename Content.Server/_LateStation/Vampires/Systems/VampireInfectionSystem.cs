@@ -5,7 +5,6 @@ using Robust.Shared.GameStates;                  // EntitySystem
 using Robust.Shared.Timing;                      // frameTime
 using Robust.Shared.GameObjects;                 // EntityQuery
 using Robust.Shared.IoC;                         // [Dependency]
-using Robust.Shared.IoC;                         // [Dependency]
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
