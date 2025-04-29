@@ -11,6 +11,7 @@ namespace Content.Shared._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
+    [AutoGenerateComponentState]
     [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireComponent : Component
     {
