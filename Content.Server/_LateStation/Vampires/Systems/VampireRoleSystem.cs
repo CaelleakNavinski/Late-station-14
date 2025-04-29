@@ -73,10 +73,11 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Avoid isolated areas and travel in groups when possible.";
 
             _chat.DispatchStationAnnouncement(
-                station.Value,
-                msg,
-                "Central Command Supernatural Affairs",
-                playDefaultSound: true);
+                station.Value,                   // source console/station
+                station.Value,                   // channel/station again for broadcast
+                msg,                             // the announcement text
+                "Central Command Supernatural Affairs", // title/sender name
+                true);                           // playDefaultSound
         }
     }
 }
