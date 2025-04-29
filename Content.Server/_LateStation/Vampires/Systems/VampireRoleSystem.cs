@@ -39,9 +39,17 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            _actions.AddAction(uid, "ActionVampireBite");
+            // Ensure the entity has an ActionsComponent
+            if (!TryComp<ActionsComponent>(uid, out var actionsComp))
+                return;
 
-            // Cap check: max(3, 20% of players)
+            // Add the bite action by reference
+            _actions.AddAction(uid,
+                ref comp.BiteActionEntity,           // stores the created action-entity
+                comp.BiteActionPrototype,           // prototype ID
+                component: actionsComp);
+
+            // Cap check...
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
             if (total == cap)
@@ -50,7 +58,16 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            _actions.RemoveAction(uid, "ActionVampireBite");
+            // If we previously stored an action reference, remove it
+            if (comp.BiteActionEntity != null
+                && TryComp<ActionsComponent>(uid, out var actionsComp))
+            {
+                _actions.RemoveAction(uid,
+                    comp.BiteActionEntity.Value,
+                    actionsComp);
+
+                comp.BiteActionEntity = null;
+            }
         }
 
         private void TriggerSilverAlert(EntityUid uid)
@@ -74,10 +91,8 @@ namespace Content.Server._LateStation.Vampires.Systems
 
             _chat.DispatchStationAnnouncement(
                 station.Value,                   // source console/station
-                station.Value,                   // channel/station again for broadcast
                 msg,                             // the announcement text
-                "Central Command Supernatural Affairs", // title/sender name
-                true);                           // playDefaultSound
+                playDefaultSound: false);
         }
     }
 }
