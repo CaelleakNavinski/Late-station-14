@@ -1,10 +1,11 @@
-using System;
-using Content.Shared.StatusEffect;               // StatusEffectsSystem, uses TimeSpan
+using Content.Shared.StatusEffect;               // StatusEffectsSystem
 using Content.Shared.Popups;                     // SharedPopupSystem
 using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.GameStates;                  // EntitySystem
 using Robust.Shared.Timing;                      // frameTime
 using Robust.Shared.GameObjects;                 // EntityQuery
+using Robust.Shared.IoC;                         // [Dependency]
+using Robust.Shared.IoC;                         // [Dependency]
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -21,11 +22,8 @@ namespace Content.Server._LateStation.Vampires.Systems
 
                 if (comp.TimeLeft <= 45f)
                 {
-                    // Blink/blind effect
-                    _status.TryAddStatusEffect(
-                        comp.Owner,
-                        "TemporaryBlindness",
-                        TimeSpan.FromSeconds(1f));
+                    // Blink/blind effect (two‐arg overload)
+                    _status.TryAddStatusEffect(comp.Owner, "TemporaryBlindness");
 
                     // Periodic thirst popup
                     if (comp.TimeLeft % 10f < frameTime)
