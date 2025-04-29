@@ -1,7 +1,7 @@
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
-using Content.Shared.Humanoid;    // brings in HumanoidComponent
+using Content.Shared.Humanoid;    
 using Robust.Shared.GameStates;              // EntitySystem
 using Robust.Server.GameObjects;             // EntityManager
 using Robust.Shared.IoC;                     // [Dependency]
@@ -23,8 +23,8 @@ namespace Content.Server._LateStation.Vampires.Systems
             var target = ev.Target;
 
             // Only humanoids
-            if (!EntityManager.HasComponent<HumanoidComponent>(target))
-                return;
+            if (!EntityManager.HadComponent<HumanoidAppearanceComponent>(uid))
+            return;
 
             // Already infected or already vampire?
             if (EntityManager.HasComponent<VampireInfectionComponent>(target) ||
