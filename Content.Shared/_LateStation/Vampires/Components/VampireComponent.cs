@@ -1,20 +1,18 @@
 using Content.Shared.StatusIcon;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
-using Robust.Shared.Prototypes;                         // for ProtoId<>
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
-using Content.Shared._LateStation.Vampires.Systems;      // for SharedVampireSystem
-using Content.Server._LateStation.Vampires.Systems;
-
+using Content.Shared._LateStation.Vampires.Systems;
 
 namespace Content.Shared._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
     [AutoGenerateComponentState]
-    [Access(typeof(SharedVampireSystem), typeof(VampireRoleSystem))]
+    [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireComponent : Component
     {
         /// <summary>
