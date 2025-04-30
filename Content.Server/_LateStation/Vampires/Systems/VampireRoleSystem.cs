@@ -1,13 +1,13 @@
 using System.Linq;
-using Content.Server.AlertLevel;                         // AlertLevelSystem
-using Content.Server.Station.Systems;                    // StationSystem
-using Content.Server.Chat.Systems;                       // ChatSystem
-using Content.Shared._LateStation.Vampires.Components;   // VampireComponent, VampireMatriarchComponent
-using Content.Shared.Actions;                            // SharedActionsSystem, ActionsComponent
-using Robust.Server.Player;                              // IPlayerManager
-using Robust.Shared.GameStates;                          // EntitySystem, ComponentInit, ComponentShutdown
-using Robust.Shared.IoC;                                 // [Dependency]
-using Robust.Shared.GameObjects;                         // SubscribeLocalEvent, EntityQuery
+using Content.Server.AlertLevel;
+using Content.Server.Station.Systems;
+using Content.Server.Chat.Systems;
+using Content.Shared._LateStation.Vampires.Components;
+using Content.Shared.Actions;
+using Robust.Server.Player;
+using Robust.Shared.GameStates;
+using Robust.Shared.IoC;
+using Robust.Shared.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -74,8 +74,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Avoid isolated areas and travel in groups when possible.";
 
             _chat.DispatchStationAnnouncement(
-                station.Value,                   // source console/station
-                msg,                             // the announcement text
+                station.Value,
+                msg,
                 playDefaultSound: false);
         }
     }
