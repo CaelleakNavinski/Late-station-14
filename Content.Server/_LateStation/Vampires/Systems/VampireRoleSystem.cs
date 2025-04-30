@@ -37,19 +37,17 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // Add the bite action PAI‐style
             _actionsSystem.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
 
             // Check vampire cap: max(3, 20% of online players)
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
-            if (total == cap)
+            if (total >= cap)
                 TriggerSilverAlert(uid);
         }
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            // Remove the bite action PAI‐style
             if (comp.BiteActionEntity != null)
             {
                 _actionsSystem.RemoveAction(uid, comp.BiteActionEntity.Value);
