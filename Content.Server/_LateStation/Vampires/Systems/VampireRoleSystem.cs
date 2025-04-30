@@ -48,11 +48,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            if (comp.BiteActionEntity != null)
-            {
-                _actionsSystem.RemoveAction(uid, comp.BiteActionEntity.Value);
-                comp.BiteActionEntity = null;
-            }
+            _actionsSystem.RemoveAction(uid, ref comp.BiteActionEntity);
         }
 
         private void TriggerSilverAlert(EntityUid uid)
