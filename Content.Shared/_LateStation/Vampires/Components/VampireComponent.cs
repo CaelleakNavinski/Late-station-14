@@ -6,6 +6,8 @@ using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
 using Content.Shared._LateStation.Vampires.Systems;      // for SharedVampireSystem
+using Content.Server._LateStation.Vampires.Systems;
+
 
 namespace Content.Shared._LateStation.Vampires.Components
 {
