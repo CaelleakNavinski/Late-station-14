@@ -1,23 +1,22 @@
 using System.Linq;
-using Content.Server.AlertLevel;                          // AlertLevelSystem
-using Content.Server.Actions;                             // ActionsSystem
-using Content.Server.Station.Systems;                     // StationSystem
-using Content.Server.Chat.Systems;                        // ChatSystem
-using Content.Shared._LateStation.Vampires.Components;    // VampireComponent, VampireMatriarchComponent
-using Content.Shared.Actions;                             // ActionsComponent
-using Robust.Server.Player;                               // IPlayerManager
-using Robust.Shared.GameStates;                           // EntitySystem, ComponentInit, ComponentShutdown
-using Robust.Shared.IoC;                                  // [Dependency]
-using Robust.Shared.GameObjects;                          // SubscribeLocalEvent, EntityQuery
+using Content.Server.AlertLevel;                         // AlertLevelSystem
+using Content.Server.Station.Systems;                    // StationSystem
+using Content.Server.Chat.Systems;                       // ChatSystem
+using Content.Shared._LateStation.Vampires.Components;   // VampireComponent, VampireMatriarchComponent
+using Content.Shared.Actions;                            // SharedActionsSystem, ActionsComponent
+using Robust.Server.Player;                              // IPlayerManager
+using Robust.Shared.GameStates;                          // EntitySystem, ComponentInit, ComponentShutdown
+using Robust.Shared.IoC;                                 // [Dependency]
+using Robust.Shared.GameObjects;                         // SubscribeLocalEvent, EntityQuery
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Manages giving/removing the bite action and triggers Silver alert at cap.
+    /// Manages giving/removing the bite action (PAI style) and triggers the Silver alert cap.
     /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
-        [Dependency] private readonly ActionsSystem _actions = default!;
+        [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
         [Dependency] private readonly IPlayerManager _players = default!;
         [Dependency] private readonly AlertLevelSystem _alerts = default!;
         [Dependency] private readonly StationSystem _stations = default!;
@@ -26,17 +25,22 @@ namespace Content.Server._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
+
+            // Hook into VampireComponent lifecycle
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
+
+            // Stub in Matriarch for future expansion
             SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>((_, _, _) => { });
             SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>((_, _, _) => { });
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            _actions.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
+            // Add the bite action PAI‐style
+            _actionsSystem.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
 
-            // Cap check: max(3, 20% of players)
+            // Check vampire cap: max(3, 20% of online players)
             var total = EntityQuery<VampireComponent>().Count();
             var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
             if (total == cap)
@@ -45,7 +49,12 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
-            _actions.RemoveAction(uid, ref comp.BiteActionEntity);
+            // Remove the bite action PAI‐style
+            if (comp.BiteActionEntity != null)
+            {
+                _actionsSystem.RemoveAction(uid, comp.BiteActionEntity.Value);
+                comp.BiteActionEntity = null;
+            }
         }
 
         private void TriggerSilverAlert(EntityUid uid)
@@ -54,7 +63,6 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (station == null)
                 return;
 
-            // Raise to Silver with announcement & sound
             _alerts.SetLevel(
                 station.Value,
                 "Silver",
@@ -68,9 +76,11 @@ namespace Content.Server._LateStation.Vampires.Systems
                 "Avoid isolated areas and travel in groups when possible.";
 
             _chat.DispatchStationAnnouncement(
-                station.Value,                   // source console/station
-                msg,                             // the announcement text
-                playDefaultSound: false);
+                station.Value,
+                station.Value,
+                msg,
+                "Central Command Supernatural Affairs",
+                playDefaultSound: true);
         }
     }
 }
