@@ -1,4 +1,4 @@
-using Content.Server.GameTicking.Rules.Components;
+using Content.Server._LateStation.GameTicking.Rules.Components;
 using Content.Server.RoundEnd;
 using Content.Server.Station.Systems;
 using Content.Shared.GameTicking.Components;
