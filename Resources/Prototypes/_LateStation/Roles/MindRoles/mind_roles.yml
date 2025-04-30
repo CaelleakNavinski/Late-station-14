@@ -1,22 +1,3 @@
-- type: entity
-  id: BaseMindRole
-  name: Mind Role
-  description: Mind Role entity
-  abstract: true
-  components:
-  - type: MindRole
-
-- type: entity
-  parent: BaseMindRole
-  id: BaseMindRoleAntag
-  abstract: true
-  components:
-  - type: MindRole
-    antag: true
-    antagPrototype: GenericAntagonist
-    roleType: SoloAntagonist
-    sortWeight: 50
-
 # Vampires
 - type: entity
   parent: BaseMindRoleAntag
@@ -30,10 +11,9 @@
   - type: VampireRole
 
 - type: entity
-  parent: BaseMindRoleAntag
+  parent: MindRoleVampireMatriarch
   id: MindRoleVampire
   name: Vampire Role
   components:
   - type: MindRole
     antagPrototype: Vampire
-  -type: VampireRole
