@@ -12,7 +12,7 @@ namespace Content.Shared._LateStation.Vampires.Components
     [RegisterComponent]
     [NetworkedComponent]
     [AutoGenerateComponentState]
-    [Access(typeof(SharedVampireSystem))]
+    [Access(typeof(SharedVampireSystem), typeof(VampireRoleSystem))]
     public sealed partial class VampireComponent : Component
     {
         /// <summary>
