@@ -3,10 +3,12 @@
   name: Vampire Bite
   description: Arm your fangs to bite a target and begin their transformation into a vampire.
   components:
-  - type: EntityTargetAction
-    icon:
-      sprite: _LateStation/Interface/Actions/vampire_bite.rsi
-      state: icon
-    itemIconStyle: BigAction
-    priority: -5
-    event: !type:VampireBiteActionEvent {}
+    - type: EntityTargetAction
+      icon:
+        sprite: Textures/_LateStation/Interface/Actions/vampire_bite.rsi
+        state: icon
+      range: 1
+      itemIconStyle: NoItem
+      priority: -10
+      useDelay: 5
+      event: !type:VampireBiteActionEvent {}
