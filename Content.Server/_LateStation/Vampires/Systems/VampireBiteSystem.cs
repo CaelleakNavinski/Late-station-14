@@ -23,15 +23,6 @@ namespace Content.Server._LateStation.Vampires.Systems
             var user = ev.Performer;
             var target = ev.Target;
 
-            // Only humanoids
-            if (!EntityManager.HasComponent<HumanoidAppearanceComponent>(target))
-                return;
-
-            // Already infected or already a vampire?
-            if (EntityManager.HasComponent<VampireInfectionComponent>(target) ||
-                EntityManager.HasComponent<VampireComponent>(target))
-                return;
-
             // Start infection
             EntityManager.AddComponent<VampireInfectionComponent>(target);
 
@@ -41,9 +32,8 @@ namespace Content.Server._LateStation.Vampires.Systems
                 ev.PopupText.Replace("{Victim}", name),
                 target,
                 PopupType.LargeCaution);
-
-            // Optionally, you could also remove the toggle from the user here
-            // But bite removal is handled by VampireComponent shutdown in VampireRoleSystem
+                
+            // Bite removal is handled by VampireComponent shutdown in VampireRoleSystem
         }
     }
 }
