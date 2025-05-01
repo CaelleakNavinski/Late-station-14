@@ -1,11 +1,12 @@
-- type: alertLevels
-  id: stationAlerts
-  defaultLevel: green
-  levels:
-    silver:
-      announcement: alert-level-silver-announcement
-      sound: /Audio/Misc/notice1.ogg
-      color: Silver
-      emergencyLightColor: LightGray
-      forceEnableEmergencyLights: true
-      shuttleTime: 600
+- type: patch
+  # Point exactly at the stationAlerts prototype in the base file
+  target: "Resources/Prototypes/AlertLevels/alert_levels.yml#stationAlerts"
+  patch:
+    levels:
+      silver:
+        announcement: alert-level-silver-announcement
+        sound: /Audio/Misc/notice1.ogg
+        color: Silver
+        emergencyLightColor: LightGray
+        forceEnableEmergencyLights: true
+        shuttleTime: 600
