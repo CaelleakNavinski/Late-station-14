@@ -9,14 +9,14 @@ vamp-mat-role-greeting =
     May your night reign eternal.
 
 vamp-mat-briefing =
-    Begin by converting key officers, then wash the station in crimson.
+    Begin by stealthily converting many to the legion, then wash the station in crimson.
     Ensure no threat remains to unmake you or your fledgling vampires.
 
 ## Vampires
 roles-antag-vamp-name = Vampire
-roles-antag-vamp-objective = Your objective is to serve the Matriarch: spread your newfound blessing and protect the Matriarch at all costs.
+roles-antag-vamp-objective = Your objective is to serve the Matriarch: spread your newly given blessing and protect the Matriarch at all costs.
 
-vamp-break-control = A surge of holy light erupts as the mercy stake pierces {$name}, erasing their vampiric curse!
+vamp-break-control = A surge of holy light erupts as the mercy stake pierces {$name}'s heart, erasing the vampiric curse!
 
 vamp-role-greeting =
     You are a Vampire.
@@ -24,7 +24,7 @@ vamp-role-greeting =
     Convert the living to join the legion, and guard your Matriarch from holy aggression.
     Embrace the night.
 
-vamp-briefing = Aid the Matriarch in spreading vampirism: convert the crew or spill their blood.
+vamp-briefing = Aid the Matriarch in spreading the blessing of vampirism: convert the crew or spill their blood.
 
 ## General
 vamp-title = Vampires
@@ -37,7 +37,7 @@ vamp-no-matriarch = There was no Vampire Matriarch to be selected. Cannot start 
 ## Outcomes
 vamp-won = The vampires have consumed or converted enough crew members. Night claims all.  
 vamp-lost = The Matriarch has fallen and the remaining brood were destroyed in the dawn’s fire.
-vamp-stalemate = Both vampires and crew lie dead in pools of blood. No victors this night.  
+vamp-stalemate = The Matriarch lives, but not enough crew were converted. No victors this night. 
 vamp-draw = Neither side remains to claim victory.
 
 ## Matriarch Count
