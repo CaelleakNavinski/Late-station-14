@@ -15,6 +15,10 @@
         components:
         - Body
         - HumanoidAppearance
+      blacklist:
+        components:
+        - Vampire
+        - VampireMatriarch
       canTargetSelf: false
       interactOnMiss: false
       checkCanAccess: false
