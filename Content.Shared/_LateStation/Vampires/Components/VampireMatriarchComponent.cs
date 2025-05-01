@@ -5,6 +5,7 @@ namespace Content.Shared._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
+    [AutoGenerateComponentState]
     public sealed partial class VampireMatriarchComponent : Component
     {
         // Marker for the Matriarch role
