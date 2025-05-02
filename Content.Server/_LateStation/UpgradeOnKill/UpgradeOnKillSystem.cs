@@ -1,11 +1,11 @@
-using Content.Server.KillTracking;
-using Content.Shared.KillTracking;
-using Content.Shared._LateStation.UpgradeOnKill;
-using Robust.Shared.GameStates;
-using Robust.Shared.IoC;
-using Robust.Shared.GameObjects;
+// Content.Server/_LateStation/Vampires/Systems/UpgradeOnKillSystem.cs
+using Content.Server.KillTracking;                           // KillTrackerComponent & KillReportedEvent
+using Content.Shared._LateStation.UpgradeOnKill;      // UpgradeOnKillComponent
+using Robust.Shared.GameStates;                             // EntitySystem, Dirty()
+using Robust.Shared.IoC;                                    // [Dependency]
+using Robust.Shared.GameObjects;                            // EntityManager, Transform()
 
-namespace Content.Server._LateStation.UpgradeOnKill
+namespace Content.Server._LateStation.Vampires.Systems
 {
     /// <summary>
     /// Generic system: when an entity with UpgradeOnKillComponent is credited with a kill,
@@ -16,24 +16,27 @@ namespace Content.Server._LateStation.UpgradeOnKill
         public override void Initialize()
         {
             base.Initialize();
-            // Listen for any kill on any entity that has both KillTracker and UpgradeOnKill
-            SubscribeLocalEvent<UpgradeOnKillComponent, KillReportedEvent>(OnKillReported);
+            // Listen for the shared KillReportedEvent on server‐tracked entities
+            SubscribeLocalEvent<KillTrackerComponent, KillReportedEvent>(OnKillReported);
         }
 
-        private void OnKillReported(EntityUid uid, UpgradeOnKillComponent comp, ref KillReportedEvent args)
+        private void OnKillReported(EntityUid uid, KillTrackerComponent _, ref KillReportedEvent args)
         {
-            // Increment and network-update
+            // We only care about items that also have our data‐driven UpgradeOnKillComponent
+            if (!EntityManager.TryGetComponent(uid, out UpgradeOnKillComponent comp))
+                return;
+
+            // Increment and network‐sync the kill counter
             comp.KillCount++;
             Dirty(uid, comp);
 
-            // If threshold not met, nothing more to do
-            if (comp.KillCount < comp.Threshold) return;
+            // If we haven't hit the configured threshold yet, bail
+            if (comp.KillCount < comp.Threshold)
+                return;
 
-            // Perform the upgrade: spawn the new prototype at the old entity's location
+            // Spawn the configured upgrade prototype at the old entity's location
             var coords = Transform(uid).Coordinates;
-            var upgraded = EntityManager.SpawnEntity(comp.UpgradePrototype, coords);
-
-            // Optionally, you could transfer ownership, tags, or stash the old entity's state here...
+            EntityManager.SpawnEntity(comp.UpgradePrototype, coords);
 
             // Finally, delete the original entity
             EntityManager.DeleteEntity(uid);
