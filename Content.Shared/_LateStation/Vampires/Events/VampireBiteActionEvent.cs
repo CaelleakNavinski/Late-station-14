@@ -5,6 +5,8 @@ using Robust.Shared.Prototypes;   // ← add this so [Prototype] resolves
 
 namespace Content.Shared._LateStation.Vampires.Events
 {
+    [NetSerializable]
+    [Serializable]
     [Prototype("VampireBiteAction")]
     public sealed partial class VampireBiteActionEvent : EntityTargetActionEvent
     {
