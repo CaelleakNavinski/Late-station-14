@@ -3,14 +3,16 @@ using Robust.Shared.GameObjects;
 
 namespace Content.Shared._LateStation.Vampires.Components
 {
-    [RegisterComponent]
-    [NetworkedComponent]
-    [AutoGenerateComponentState]
+    [Access(typeof(SharedVampireSystem))]
+    [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
     public sealed partial class VampireMatriarchComponent : Component
     {
-        
+        [ViewVariables(VVAccess.ReadOnly)]
+        [AutoNetworkedField]
         public float OriginalMaxHP;
-        public float OriginalCritThreshold;
 
+        [ViewVariables(VVAccess.ReadOnly)]
+        [AutoNetworkedField]
+        public float OriginalCritThreshold;
     }
 }

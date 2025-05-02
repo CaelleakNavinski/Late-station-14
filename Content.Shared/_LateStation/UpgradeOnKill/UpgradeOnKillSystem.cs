@@ -1,10 +1,11 @@
 using Content.Server.KillTracking;
 using Content.Shared.KillTracking;
+using Content.Shared._LateStation.UpgradeOnKill;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
 using Robust.Shared.GameObjects;
 
-namespace Content.Server._LateStation.KillTracking
+namespace Content.Server._LateStation.UpgradeOnKill
 {
     /// <summary>
     /// Generic system: when an entity with UpgradeOnKillComponent is credited with a kill,

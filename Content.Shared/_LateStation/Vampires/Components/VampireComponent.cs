@@ -20,12 +20,14 @@ namespace Content.Shared._LateStation.Vampires.Components
         /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("statusIcon")]
+        [AutoNetworkedField]
         public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
 
         /// <summary>
         /// Sound that plays when you become a vampire.
         /// </summary>
         [DataField("vampStartSound")]
+        [AutoNetworkedField]
         public SoundSpecifier VampireStartSound { get; set; }
             = new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
 
@@ -34,6 +36,7 @@ namespace Content.Shared._LateStation.Vampires.Components
         /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("biteActionPrototype")]
+        [AutoNetworkedField]
         public string BiteActionPrototype { get; set; } = "ActionVampireBite";
 
         /// <summary>
