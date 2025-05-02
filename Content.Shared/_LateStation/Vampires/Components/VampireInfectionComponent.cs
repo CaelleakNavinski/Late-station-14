@@ -2,11 +2,13 @@ using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
+using Content.Shared._LateStation.Vampires.Systems;
 
 namespace Content.Shared._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
+    [AutoGenerateComponentState]
     [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireInfectionComponent : Component
     {
