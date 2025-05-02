@@ -1,4 +1,3 @@
-using Content.Server._LateStation.Vampires.Systems;
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
