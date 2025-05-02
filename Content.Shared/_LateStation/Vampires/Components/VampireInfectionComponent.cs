@@ -9,7 +9,8 @@ namespace Content.Shared._LateStation.Vampires.Components
     [RegisterComponent]
     [NetworkedComponent]
     [AutoGenerateComponentState]
-    [Access(typeof(SharedVampireSystem), typeof(VampireInfectionSystem))]
+    // Only the shared system needs read/write here
+    [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireInfectionComponent : Component
     {
         [ViewVariables(VVAccess.ReadWrite)]
@@ -22,19 +23,16 @@ namespace Content.Shared._LateStation.Vampires.Components
         [AutoNetworkedField]
         public float MaxTime { get; set; } = 180f;
 
-        // Tracks accumulated time between whisper popups
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("popupAccumulator")]
         [AutoNetworkedField]
         public float PopupAccumulator { get; set; }
 
-        // For detecting threshold crossings
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("previousTimeLeft")]
         [AutoNetworkedField]
         public float PreviousTimeLeft { get; set; }
 
-        // Which final‐stage message we've shown
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("finalStage")]
         [AutoNetworkedField]
