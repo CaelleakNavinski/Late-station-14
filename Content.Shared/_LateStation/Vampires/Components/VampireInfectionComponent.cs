@@ -1,3 +1,4 @@
+using Content.Server._LateStation.Vampires.Systems;
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
@@ -9,7 +10,7 @@ namespace Content.Shared._LateStation.Vampires.Components
     [RegisterComponent]
     [NetworkedComponent]
     [AutoGenerateComponentState]
-    [Access(typeof(SharedVampireSystem))]
+    [Access(typeof(SharedVampireSystem), typeof(VampireInfectionSystem))]
     public sealed partial class VampireInfectionComponent : Component
     {
         [ViewVariables(VVAccess.ReadWrite)]
