@@ -1,0 +1,61 @@
+- type: entity
+  name: the Reaver
+  parent: [ BaseSword, BaseOccultContraband ]
+  id: ReaverUnsealed
+  description: A jagged obsidian blade, thirsting for mortal blood.
+  components:
+  - type: Sprite
+    # placeholder sprite
+    sprite: Objects/Weapons/Melee/claymore.rsi
+  - type: MeleeWeapon
+    damage:
+      types:
+        Slash: 16
+    soundHit:
+        path: /Audio/Weapons/bladeslice.ogg
+  - type: Reflect
+    reflectProb: .15
+    spread: 90
+  - type: Item
+    # placeholder sprite
+    sprite: Objects/Weapons/Melee/claymore.rsi
+  - type: Tag
+    tags:
+    - Reaver
+  - type: Clothing
+    sprite: Objects/Weapons/Melee/claymore.rsi
+    slots:
+    - back
+  - type: DisarmMalus
+  - type: UpgradeOnKill
+    threshold: 3
+    upgradePrototype: ReaverBlood
+
+- type: entity
+  name: the Blood Reaver
+  parent: [ BaseSword, BaseOccultContraband ]
+  id: BloodReaver
+  description: A crackling ruby-hung blade, alive with vampiric hunger.
+  components:
+  - type: Sprite
+    # placeholder sprite
+    sprite: Objects/Weapons/Melee/claymore.rsi
+  - type: MeleeWeapon
+    attackRate: 0.8
+    damage:
+      types:
+        Slash: 22
+        Airloss: 8
+      soundHit: 
+          path: /Audio/Weapons/bladeslice.ogg
+  - type: Reflect
+    reflectProb: .2
+    spread: 90
+  - type: Clothing
+    sprite: Objects/Weapons/Melee/claymore.rsi
+    slots:
+    - back
+  - type: Item
+    # placeholder sprite
+    sprite: Objects/Weapons/Melee/claymore.rsi
+  - type: DisarmMalus
