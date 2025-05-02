@@ -34,7 +34,7 @@
 - type: entity
   name: the Blood Reaver
   parent: [ BaseSword, BaseOccultContraband ]
-  id: BloodReaver
+  id: ReaverBlood
   description: A crackling ruby-hung blade, alive with vampiric hunger.
   components:
   - type: Sprite
