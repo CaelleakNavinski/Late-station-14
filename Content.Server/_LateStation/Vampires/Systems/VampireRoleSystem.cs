@@ -3,7 +3,7 @@ using System.Linq;
 using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
-using Content.Shared._LateStation.Vampires.Components;
+using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;
 using Content.Shared.Damage.Components;
 using Content.Shared.Mobs.Components;
@@ -14,9 +14,6 @@ using Robust.Shared.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
-    /// <summary>
-    /// Manages giving/removing the bite action (PAI style) and triggers the Silver alert cap.
-    /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
         [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;

@@ -1,6 +1,6 @@
+using Content.Server._LateStation.Vampires.Components;
 using System;
 using Content.Shared.Popups;
-using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.GameStates;
 using Robust.Shared.Timing;
 using Robust.Shared.GameObjects;
