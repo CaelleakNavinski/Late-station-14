@@ -8,6 +8,9 @@ namespace Content.Shared._LateStation.Vampires.Components
     [AutoGenerateComponentState]
     public sealed partial class VampireMatriarchComponent : Component
     {
-        // Marker for the Matriarch role
+        
+        public float OriginalMaxHP;
+        public float OriginalCritThreshold;
+
     }
 }

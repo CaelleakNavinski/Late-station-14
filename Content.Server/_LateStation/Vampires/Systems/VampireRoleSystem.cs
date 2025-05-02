@@ -1,9 +1,12 @@
+using System;
 using System.Linq;
 using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared.Actions;
+using Content.Shared.Damage.Components;
+using Content.Shared.Mobs.Components;
 using Robust.Server.Player;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
@@ -30,9 +33,9 @@ namespace Content.Server._LateStation.Vampires.Systems
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
 
-            // Stub in Matriarch for future expansion
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>((_, _, _) => { });
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>((_, _, _) => { });
+            // Hook into the VampireMatriarchComponent lifecycle
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(OnMatriarchInit);
+            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(OnMatriarchShutdown);
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
@@ -49,6 +52,33 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
             _actionsSystem.RemoveAction(uid, comp.BiteActionEntity);
+        }
+
+        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
+        {
+            if (TryComp<DamageableComponent>(uid, out var damageable))
+            {
+
+                // Store the original max HP and Crit threshold to restore later
+                comp.OriginalMaxHP = damageable.MaxHP;
+                comp.OriginalCritThreshold = damageable.CriticalThreshold;
+
+                // Bump the Matriarch's stats (not hard-setting it; +20HP and -20CHP)
+                damageable.MaxHP = (comp.OriginalMaxHP + 20f);
+                damageable.CurrentHP = Math.Min(damageable.CurrentHP + (120f - comp.OriginalMaxHP), 120f);
+                damageable.CriticalThreshold = (comp.OriginalCritThreshold - 20f);
+            }
+        }
+
+        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
+        {
+            if (TryComp<DamageableComponent>(uid, out var damageable))
+            {
+
+                damageable.MaxHP = comp.OriginalMaxHP;
+                damageable.CriticalThreshold = comp.OriginalCritThreshold;
+                damageable.CurrentHP = Math.Min(damageable.CurrentHP, damageable.MaxHP);
+            }
         }
 
         private void TriggerSilverAlert(EntityUid uid)
