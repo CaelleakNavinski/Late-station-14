@@ -1,3 +1,4 @@
+using Content.Server._LateStation.UpgradeOnKill;
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
