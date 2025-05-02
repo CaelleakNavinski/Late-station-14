@@ -1,11 +1,9 @@
-using Content.Server._LateStation.UpgradeOnKill;
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 
 namespace Content.Shared._LateStation.UpgradeOnKill
 {
-    [Access(typeof(UpgradeOnKillSystem))]
     [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
     public sealed partial class UpgradeOnKillComponent : Component
     {
