@@ -1,6 +1,5 @@
-// Content.Server/_LateStation/Vampires/Systems/UpgradeOnKillSystem.cs
-using Content.Server.KillTracking;                           // KillTrackerComponent & KillReportedEvent
-using Content.Shared._LateStation.UpgradeOnKill;      // UpgradeOnKillComponent
+using Content.Server.KillTracking;                           // KillTrackerComponent, KillReportedEvent
+using Content.Shared._LateStation.Vampires.Components;      // UpgradeOnKillComponent
 using Robust.Shared.GameStates;                             // EntitySystem, Dirty()
 using Robust.Shared.IoC;                                    // [Dependency]
 using Robust.Shared.GameObjects;                            // EntityManager, Transform()
@@ -16,29 +15,28 @@ namespace Content.Server._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
-            // Listen for the shared KillReportedEvent on server‐tracked entities
+            // Listen for kills on any entity that has a KillTrackerComponent
             SubscribeLocalEvent<KillTrackerComponent, KillReportedEvent>(OnKillReported);
         }
 
         private void OnKillReported(EntityUid uid, KillTrackerComponent _, ref KillReportedEvent args)
         {
-            // We only care about items that also have our data‐driven UpgradeOnKillComponent
-            if (!EntityManager.TryGetComponent(uid, out UpgradeOnKillComponent comp))
+            // TryGetComponent now declares comp as nullable
+            if (!EntityManager.TryGetComponent(uid, out UpgradeOnKillComponent? comp))
                 return;
 
-            // Increment and network‐sync the kill counter
-            comp.KillCount++;
+            // At this point comp is non-null
+            comp!.KillCount++;
             Dirty(uid, comp);
 
-            // If we haven't hit the configured threshold yet, bail
             if (comp.KillCount < comp.Threshold)
                 return;
 
-            // Spawn the configured upgrade prototype at the old entity's location
+            // Spawn the upgraded prototype at the old entity’s location
             var coords = Transform(uid).Coordinates;
-            EntityManager.SpawnEntity(comp.UpgradePrototype, coords);
+            EntityManager.SpawnEntity(comp.UpgradePrototype!, coords);
 
-            // Finally, delete the original entity
+            // Remove the original item
             EntityManager.DeleteEntity(uid);
         }
     }
