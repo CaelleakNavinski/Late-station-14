@@ -1,12 +1,14 @@
+using Robust.Shared.GameStates;
 using Robust.Shared.GameObjects;
 
 namespace Content.Shared._LateStation.Vampires.Systems
 {
     /// <summary>
-    /// Shared system marker for vampire access attributes.
+    /// Shared‐side system for Vampire components (network syncing, etc.).
+    /// Exists solely so `[Access(typeof(SharedVampireSystem))]` resolves in the shared assembly.
     /// </summary>
-    public sealed class SharedVampireSystem : EntitySystem
+    public abstract class SharedVampireSystem : EntitySystem
     {
-        // Intentionally empty.
+        // No implementation needed; it just has to exist.
     }
 }
