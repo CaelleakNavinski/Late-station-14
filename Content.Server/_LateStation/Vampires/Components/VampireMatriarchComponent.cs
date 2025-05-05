@@ -1,30 +1,22 @@
-using Content.Server._LateStation.Vampires.Systems;
 using Robust.Shared.GameStates;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
+// Shared metadata and sync
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Systems;
+// Your server role system
+using Content.Server._LateStation.Vampires.Systems;
 
 namespace Content.Server._LateStation.Vampires.Components
 {
-    /// <summary>
-    /// Grants write‐access so VampireRoleSystem can set and restore the Matriarch’s HP values.
-    /// </summary>
     [RegisterComponent]
     [NetworkedComponent]
     [AutoGenerateComponentState]
-    // Allow SharedVampireSystem (sync) and VampireRoleSystem (buff/restore)
+    // Grant both SharedVampireSystem (for sync) and VampireRoleSystem (for HP buff/restore) write access
     [Access(typeof(SharedVampireSystem), typeof(VampireRoleSystem))]
     public sealed partial class VampireMatriarchComponent : Component
     {
-        /// <summary>Stored MaxHP before Matriarch buff.</summary>
-        [ViewVariables(VVAccess.ReadWrite)]
-        [AutoNetworkedField]
-        public float OriginalMaxHP { get; set; }
-
-        /// <summary>Stored crit threshold before Matriarch buff.</summary>
-        [ViewVariables(VVAccess.ReadWrite)]
-        [AutoNetworkedField]
-        public float OriginalCritThreshold { get; set; }
+        // The two fields/properties are declared in the shared partial.
+        // This server partial only applies the [Access] attribute.
     }
 }
