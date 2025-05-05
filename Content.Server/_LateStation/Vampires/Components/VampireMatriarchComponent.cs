@@ -1,10 +1,8 @@
 using Robust.Shared.GameStates;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
-// Shared metadata and sync
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Systems;
-// Your server role system
 using Content.Server._LateStation.Vampires.Systems;
 
 namespace Content.Server._LateStation.Vampires.Components
