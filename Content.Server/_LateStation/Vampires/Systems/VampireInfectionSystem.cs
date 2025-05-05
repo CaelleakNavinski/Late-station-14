@@ -1,14 +1,17 @@
-using Content.Server._LateStation.Vampires.Components;
 using System;
 using Content.Shared.Popups;
-using Robust.Shared.GameStates;
-using Robust.Shared.Timing;
-using Robust.Shared.GameObjects;
-using Robust.Shared.IoC;
-using Robust.Shared.Random;
+using Content.Server._LateStation.Vampires.Components;   // VampireInfectionComponent
+using Robust.Shared.GameStates;                         // EntitySystem
+using Robust.Shared.Timing;                             // frameTime
+using Robust.Shared.GameObjects;                        // EntityQuery
+using Robust.Shared.IoC;                                // [Dependency]
+using Robust.Shared.Random;                             // IRobustRandom
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
+    /// <summary>
+    /// Ticks down infection timers, shows flavor popups, and converts targets when time runs out.
+    /// </summary>
     public sealed class VampireInfectionSystem : EntitySystem
     {
         private static readonly string[] TurningMessages =
@@ -44,6 +47,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnInit(EntityUid uid, VampireInfectionComponent comp, ComponentInit args)
         {
+            // Initialize our tracked fields
             comp.PopupAccumulator = 0f;
             comp.PreviousTimeLeft = comp.TimeLeft;
             comp.FinalStage = 0;
@@ -53,7 +57,7 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             foreach (var comp in EntityQuery<VampireInfectionComponent>(true))
             {
-                // Tick down
+                // Countdown
                 comp.TimeLeft = MathF.Max(0f, comp.TimeLeft - frameTime);
 
                 // Random whispers between 45s and 10s
@@ -71,7 +75,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                     }
                 }
 
-                // Final fixed messages at thresholds
+                // Final staged messages at thresholds
                 while (comp.FinalStage < FinalThresholds.Length
                        && comp.PreviousTimeLeft > FinalThresholds[comp.FinalStage]
                        && comp.TimeLeft <= FinalThresholds[comp.FinalStage])
@@ -83,7 +87,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
                 comp.PreviousTimeLeft = comp.TimeLeft;
 
-                // Conversion
+                // Conversion!
                 if (comp.TimeLeft <= 0f)
                 {
                     _popup.PopupEntity("THIRSTY.", comp.Owner, PopupType.LargeCaution);
