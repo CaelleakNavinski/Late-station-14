@@ -2,6 +2,7 @@ using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
+using Client.Shared._LateStation.Vampires.Components;
 
 namespace Content.Server._LateStation.Vampires.Components
 {
@@ -9,7 +10,7 @@ namespace Content.Server._LateStation.Vampires.Components
     [NetworkedComponent]
     [AutoGenerateComponentState]
     [Access(typeof(Content.Server._LateStation.Vampires.Systems.VampireInfectionSystem))]
-    public sealed partial class VampireInfectionComponent : Component
+    public sealed partial class VampireInfectionComponent : SharedVampireInfectionComponent
     {
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("timeLeft")]
