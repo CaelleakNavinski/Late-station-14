@@ -5,7 +5,7 @@ using Content.Shared._LateStation.Vampires.Components;
 namespace Content.Client._LateStation.Vampires.Systems
 {
     public sealed class VampireClientSystem : EntitySystem
-    //{
+    {
        // public override void Initialize()
         //{
             //SubscribeLocalEvent<VampireInfectionComponent, ComponentGetState>(OnGetState);
@@ -15,5 +15,5 @@ namespace Content.Client._LateStation.Vampires.Systems
         //{
             // Client-side vision HUD effects go here.
         //}
-    //}
+    }
 }
