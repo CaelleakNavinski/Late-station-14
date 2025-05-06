@@ -6,7 +6,7 @@ using Content.Server.Chat.Systems;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;
-using Content.Shared.Damage.Components;
+using Content.Shared.Damage;
 using Robust.Server.Player;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
