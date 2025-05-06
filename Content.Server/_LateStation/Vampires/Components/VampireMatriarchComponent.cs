@@ -2,14 +2,14 @@ using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Robust.Shared.ViewVariables;
 using Robust.Shared.GameObjects;
-using Client.Shared._LateStation.Vampires.Components;
 
 namespace Content.Server._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
+    [ComponentProtoName("ServerVampireMatriarch")]
     [Access(typeof(Content.Server._LateStation.Vampires.Systems.VampireRoleSystem))]
-    public sealed partial class VampireMatriarchComponent : SharedVampireMatriarchComponent
+    public sealed partial class VampireMatriarchComponent : Component
     {
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("originalMaxHP")]
