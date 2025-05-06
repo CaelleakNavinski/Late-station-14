@@ -35,5 +35,7 @@ namespace Content.Server._LateStation.Vampires.Components
         [DataField("finalStage")]
         [AutoNetworkedField]
         public int FinalStage { get; set; }
+
+        public float[] FinalThresholds { get; set; } = new float[] { 30f, 20f, 10f, 5f, 2f };
     }
 }
