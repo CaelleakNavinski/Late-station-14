@@ -1,7 +1,6 @@
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
-using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Humanoid;            // for HumanoidComponent
 using Content.Shared.Actions;             // for ActionsComponent (if needed)
 using Robust.Shared.GameStates;           // EntitySystem
@@ -29,10 +28,8 @@ namespace Content.Server._LateStation.Vampires.Systems
 
             // Flavor popup
             var name = EntityManager.GetComponent<MetaDataComponent>(target).EntityName;
-            _popup.PopupEntity(
-                ev.PopupText.Replace("{Victim}", name),
-                target,
-                PopupType.LargeCaution);
+            var popup = Loc.GetString("vamp-bite-popup", ("{Victim}", name));
+            _popup.PopupEntity(popup, target, PopupType.LargeCaution);
                 
             // Bite removal is handled by VampireComponent shutdown in VampireRoleSystem
         }
