@@ -17,6 +17,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         public override void Initialize()
         {
+            base.Initialize();
             SubscribeLocalEvent<VampireBiteActionEvent>(OnBite);
         }
 
