@@ -41,27 +41,9 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args) { }
 
-        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
-        {
-            if (TryComp<DamageableComponent>(uid, out var dmg))
-            {
-                comp.OriginalMaxHP         = dmg.MaxHP;
-                comp.OriginalCritThreshold = dmg.CriticalThreshold;
-                dmg.MaxHP                  = comp.OriginalMaxHP + 20f;
-                dmg.CurrentHP              = Math.Min(dmg.CurrentHP + (120f - comp.OriginalMaxHP), 120f);
-                dmg.CriticalThreshold      = comp.OriginalCritThreshold - 20f;
-            }
-        }
+        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args) { }
 
-        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
-        {
-            if (TryComp<DamageableComponent>(uid, out var dmg))
-            {
-                dmg.MaxHP             = comp.OriginalMaxHP;
-                dmg.CriticalThreshold = comp.OriginalCritThreshold;
-                dmg.CurrentHP         = Math.Min(dmg.CurrentHP, dmg.MaxHP);
-            }
-        }
+        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args) { }
 
         private void TriggerSilverAlert(EntityUid uid)
         {
