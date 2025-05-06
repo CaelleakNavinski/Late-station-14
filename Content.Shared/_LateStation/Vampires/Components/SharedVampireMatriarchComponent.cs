@@ -6,7 +6,7 @@ namespace Content.Shared._LateStation.Vampires.Components
 {
     [RegisterComponent]
     [NetworkedComponent]
-    public sealed partial class VampireMatriarchComponent : Component
+    public sealed partial class SharedVampireMatriarchComponent : Component
     {
         // marker only; buffs tracked server-side
     }
