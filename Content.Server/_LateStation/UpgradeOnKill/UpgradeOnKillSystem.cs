@@ -1,5 +1,5 @@
 using Content.Server.KillTracking;                           // KillTrackerComponent, KillReportedEvent
-using Content.Shared._LateStation.UpgradeOnKill.Components;
+using Content.Shared._LateStation.UpgradeOnKill;
 using Robust.Shared.GameStates;                             // EntitySystem, Dirty()
 using Robust.Shared.IoC;                                    // [Dependency]
 using Robust.Shared.GameObjects;                            // EntityManager, Transform()
