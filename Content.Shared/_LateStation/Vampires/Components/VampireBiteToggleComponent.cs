@@ -8,5 +8,6 @@ namespace Content.Shared._LateStation.Vampires.Components
     [RegisterComponent, NetworkedComponent]
     public sealed partial class VampireBiteToggleComponent : Component
     {
+        /// literally just a marker
     }
 }

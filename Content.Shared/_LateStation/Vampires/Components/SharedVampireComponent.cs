@@ -13,10 +13,11 @@ namespace Content.Shared._LateStation.Vampires.Components
     [NetworkedComponent]
     [AutoGenerateComponentState]
     [Access(typeof(SharedVampireSystem))]
-    public sealed partial class VampireComponent : Component
+    public sealed partial class SharedVampireComponent : Component
     {
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("statusIcon")]
+        [AutoNetworkedField]
         public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
 
         [DataField("vampStartSound")]

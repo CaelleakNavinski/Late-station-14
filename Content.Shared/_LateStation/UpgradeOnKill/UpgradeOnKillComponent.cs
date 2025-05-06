@@ -7,7 +7,7 @@ namespace Content.Shared._LateStation.UpgradeOnKill
     [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
     public sealed partial class UpgradeOnKillComponent : Component
     {
-        [ViewVariables(VVAccess.ReadOnly)]
+        [ViewVariables(VVAccess.ReadWrite)]
         [DataField("killCount")]
         [AutoNetworkedField]              // ← mark it networked
         public int KillCount = 0;

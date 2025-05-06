@@ -12,31 +12,31 @@ namespace Content.Server._LateStation.Vampires.Systems
     /// <summary>
     /// Handles the countdown from bite to full vampirism,
     /// issues intermittent and final flavor popups,
-    /// and converts the entity when the timer reaches zero.
+    /// converts the entity when the timer reaches zero.
     /// </summary>
     public sealed class VampireInfectionSystem : EntitySystem
     {
         private static readonly string[] TurningMessages =
         {
-            "Feed...",
-            "Their blood calls...",
-            "Embrace the darkness...",
-            "The hunger wins soon...",
-            "Tick... tock...",
-            "Their pulse is your lullaby...",
-            "Their blood... it sings.",
-            "The void in your veins grows."
+            "Feed...",                        // Loc.GetString("vamp-turn-msg-1")
+            "Their blood calls...",           // Loc.GetString("vamp-turn-msg-2")
+            "Embrace the darkness...",        // Loc.GetString("vamp-turn-msg-3")
+            "The hunger wins soon...",        // Loc.GetString("vamp-turn-msg-4")
+            "Tick... tock...",                // Loc.GetString("vamp-turn-msg-5")
+            "Their pulse is your lullaby...", // Loc.GetString("vamp-turn-msg-6")
+            "Their blood... it sings.",       // Loc.GetString("vamp-turn-msg-7")
+            "The void in your veins grows."   // Loc.GetString("vamp-turn-msg-8")
         };
 
         // At these remaining-times, show one fixed “final” message in order.
         private static readonly float[] FinalThresholds = { 10f, 8f, 6f, 4f, 2f };
         private static readonly string[] FinalMessages =
         {
-            "Your final heartbeat...",
-            "You feel the last of your humanity slipping away...",
-            "You cannot remember why you fought it...",
-            "You feel peace like you've never known...",
-            "You feel..."
+            "Your final heartbeat...",                              // Loc.GetString("vamp-final-msg-1")
+            "You feel the last of your humanity slipping away...",  // Loc.GetString("vamp-final-msg-2")
+            "You cannot remember why you fought it...",             // Loc.GetString("vamp-final-msg-3")
+            "You feel peace like you've never known...",            // Loc.GetString("vamp-final-msg-4")
+            "You feel..."                                           // Loc.GetString("vamp-final-msg-5")
         };
 
         [Dependency] private readonly SharedPopupSystem _popup = default!;
@@ -95,7 +95,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
                 // When timer hits zero, convert to full Vampire
                 if (comp.TimeLeft <= 0f)
-                {
+                {   // Loc.GetString("vamp-final-msg-6")
                     _popup.PopupEntity("THIRSTY.", comp.Owner, PopupType.LargeCaution);
                     // Remove infection marker
                     EntityManager.RemoveComponent<VampireInfectionComponent>(comp.Owner);

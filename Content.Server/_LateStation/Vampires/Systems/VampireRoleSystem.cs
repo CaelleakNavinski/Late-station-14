@@ -4,6 +4,7 @@ using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
 using Content.Shared._LateStation.Vampires.Components;
+using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;
 using Content.Shared.Damage.Components;
 using Robust.Server.Player;

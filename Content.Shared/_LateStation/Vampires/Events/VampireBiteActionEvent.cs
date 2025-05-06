@@ -13,7 +13,7 @@ namespace Content.Shared._LateStation.Vampires.Events
     {
         [DataField("popupText")]
         public string PopupText { get; private set; }
-            = "A crimson spray bursts from {Victim} as fangs sink in!";
+            = "A crimson spray bursts from {Victim} as fangs sink in!"; /// Loc.GetString("vamp-bite-text")
 
         [DataField("speech")]
         public string? Speech { get; private set; }

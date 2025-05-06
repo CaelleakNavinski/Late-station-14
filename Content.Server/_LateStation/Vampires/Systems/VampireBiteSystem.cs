@@ -1,6 +1,7 @@
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
+using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Humanoid;            // for HumanoidComponent
 using Content.Shared.Actions;             // for ActionsComponent (if needed)
 using Robust.Shared.GameStates;           // EntitySystem

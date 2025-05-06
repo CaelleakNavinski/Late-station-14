@@ -12,6 +12,6 @@ namespace Content.Server._LateStation.Vampires.Components
     [Access(typeof(SharedVampireSystem), typeof(VampireRoleSystem))]
     public sealed partial class VampireComponent : Component 
     { 
-        // this is fibe
+        // this is fine
     }
 }
