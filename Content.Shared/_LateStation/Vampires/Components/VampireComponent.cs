@@ -15,36 +15,21 @@ namespace Content.Shared._LateStation.Vampires.Components
     [Access(typeof(SharedVampireSystem))]
     public sealed partial class VampireComponent : Component
     {
-        /// <summary>
-        /// Status icon shown for vampires.
-        /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("statusIcon")]
-        [AutoNetworkedField]
         public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
 
-        /// <summary>
-        /// Sound that plays when you become a vampire.
-        /// </summary>
         [DataField("vampStartSound")]
-        [AutoNetworkedField]
-        public SoundSpecifier VampireStartSound { get; set; }
-            = new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
+        public SoundSpecifier VampireStartSound { get; set; } =
+            new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
 
-        /// <summary>
-        /// Prototype ID for the bite action to add on conversion.
-        /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("biteActionPrototype")]
         [AutoNetworkedField]
         public string BiteActionPrototype { get; set; } = "ActionVampireBite";
 
-        /// <summary>
-        /// Stores the action entity created so we can remove it cleanly later.
-        /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]
-        [DataField("biteActionEntity")]
-        [AutoNetworkedField]
+        [DataField("biteActionEntity"), AutoNetworkedField]
         public EntityUid? BiteActionEntity;
 
         public override bool SessionSpecific => true;
