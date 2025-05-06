@@ -1,77 +1,108 @@
 using System;
-using System.Linq;
-using Content.Server.AlertLevel;
-using Content.Server.Station.Systems;
-using Content.Server.Chat.Systems;
-using Content.Shared._LateStation.Vampires.Components;
-using Content.Shared.Actions;
-using Content.Shared.Damage.Components;
-using Robust.Server.Player;
+using Content.Shared.Popups;
+using Content.Server._LateStation.Vampires.Components;
 using Robust.Shared.GameStates;
-using Robust.Shared.IoC;
+using Robust.Shared.Timing;
 using Robust.Shared.GameObjects;
+using Robust.Shared.IoC;
+using Robust.Shared.Random;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
-    public sealed class VampireRoleSystem : EntitySystem
+    /// <summary>
+    /// Handles the countdown from bite to full vampirism,
+    /// issues intermittent and final flavor popups,
+    /// and converts the entity when the timer reaches zero.
+    /// </summary>
+    public sealed class VampireInfectionSystem : EntitySystem
     {
-        [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
-        [Dependency] private readonly IPlayerManager _players = default!;
-        [Dependency] private readonly AlertLevelSystem _alerts = default!;
-        [Dependency] private readonly StationSystem _stations = default!;
-        [Dependency] private readonly ChatSystem _chat = default!;
+        private static readonly string[] TurningMessages =
+        {
+            "Feed...",
+            "Their blood calls...",
+            "Embrace the darkness...",
+            "The hunger wins soon...",
+            "Tick... tock...",
+            "Their pulse is your lullaby...",
+            "Their blood... it sings.",
+            "The void in your veins grows."
+        };
+
+        // At these remaining-times, show one fixed “final” message in order.
+        private static readonly float[] FinalThresholds = { 10f, 8f, 6f, 4f, 2f };
+        private static readonly string[] FinalMessages =
+        {
+            "Your final heartbeat...",
+            "You feel the last of your humanity slipping away...",
+            "You cannot remember why you fought it...",
+            "You feel peace like you've never known...",
+            "You feel..."
+        };
+
+        [Dependency] private readonly SharedPopupSystem _popup = default!;
+        [Dependency] private readonly IRobustRandom _random = default!;
 
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
-            SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(OnMatriarchInit);
-            SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(OnMatriarchShutdown);
+            SubscribeLocalEvent<VampireInfectionComponent, ComponentInit>(OnInit);
         }
 
-        private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
+        private void OnInit(EntityUid uid, VampireInfectionComponent comp, ComponentInit args)
         {
-            var total = EntityQuery<VampireComponent>().Count();
-            var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
-            if (total >= cap)
-                TriggerSilverAlert(uid);
+            // Reset tracking fields on new infection
+            comp.PopupAccumulator = 0f;
+            comp.PreviousTimeLeft = comp.TimeLeft;
+            comp.FinalStage = 0;
         }
 
-        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args) { }
-
-        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
+        public override void Update(float frameTime)
         {
-            if (TryComp<DamageableComponent>(uid, out var dmg))
+            base.Update(frameTime);
+
+            // Iterate all infected but not yet fully converted
+            foreach (var comp in EntityQuery<VampireInfectionComponent>(true))
             {
-                comp.OriginalMaxHP         = dmg.MaxHP;
-                comp.OriginalCritThreshold = dmg.CriticalThreshold;
-                dmg.MaxHP                  = comp.OriginalMaxHP + 20f;
-                dmg.CurrentHP              = Math.Min(dmg.CurrentHP + (120f - comp.OriginalMaxHP), 120f);
-                dmg.CriticalThreshold      = comp.OriginalCritThreshold - 20f;
-            }
-        }
+                // Decrease the timer
+                comp.TimeLeft = MathF.Max(0f, comp.TimeLeft - frameTime);
 
-        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
-        {
-            if (TryComp<DamageableComponent>(uid, out var dmg))
-            {
-                dmg.MaxHP             = comp.OriginalMaxHP;
-                dmg.CriticalThreshold = comp.OriginalCritThreshold;
-                dmg.CurrentHP         = Math.Min(dmg.CurrentHP, dmg.MaxHP);
-            }
-        }
+                // Between 45s and 10s, every ~3s show a random whisper
+                if (comp.TimeLeft <= 45f && comp.TimeLeft >= 10f)
+                {
+                    comp.PopupAccumulator += frameTime;
+                    if (comp.PopupAccumulator >= 3f)
+                    {
+                        comp.PopupAccumulator -= 3f;
+                        if (_random.Prob(0.33f))
+                        {
+                            var msg = _random.Pick(TurningMessages);
+                            _popup.PopupEntity(msg, comp.Owner, PopupType.Medium);
+                        }
+                    }
+                }
 
-        private void TriggerSilverAlert(EntityUid uid)
-        {
-            var station = _stations.GetOwningStation(uid);
-            if (station == null) return;
-            _alerts.SetLevel(station.Value, "Silver", playSound: true, announce: true, force: true);
-            const string msg =
-                "Scans have detected a significant escalation in vampiric activity aboard the station. " +
-                "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
-                "Avoid isolated areas and travel in groups when possible.";
-            _chat.DispatchStationAnnouncement(station.Value, msg, playDefaultSound: false);
+                // At each final threshold crossing, show the corresponding final message
+                while (comp.FinalStage < FinalThresholds.Length
+                       && comp.PreviousTimeLeft > FinalThresholds[comp.FinalStage]
+                       && comp.TimeLeft <= FinalThresholds[comp.FinalStage])
+                {
+                    var finalMsg = FinalMessages[comp.FinalStage];
+                    _popup.PopupEntity(finalMsg, comp.Owner, PopupType.MediumCaution);
+                    comp.FinalStage++;
+                }
+
+                comp.PreviousTimeLeft = comp.TimeLeft;
+
+                // When timer hits zero, convert to full Vampire
+                if (comp.TimeLeft <= 0f)
+                {
+                    _popup.PopupEntity("THIRSTY.", comp.Owner, PopupType.LargeCaution);
+                    // Remove infection marker
+                    EntityManager.RemoveComponent<VampireInfectionComponent>(comp.Owner);
+                    // Add actual Vampire role/component
+                    EntityManager.AddComponent<VampireComponent>(comp.Owner);
+                }
+            }
         }
     }
 }
