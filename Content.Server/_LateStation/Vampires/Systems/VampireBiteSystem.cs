@@ -6,6 +6,7 @@ using Content.Shared.Actions;             // for ActionsComponent (if needed)
 using Robust.Shared.GameStates;           // EntitySystem
 using Robust.Server.GameObjects;          // EntityManager, SharedPopupSystem
 using Robust.Shared.IoC;                  // [Dependency]
+using Robust.Shared.Localization;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -28,10 +29,10 @@ namespace Content.Server._LateStation.Vampires.Systems
 
             // Flavor popup
             var name = EntityManager.GetComponent<MetaDataComponent>(target).EntityName;
-            var popup = Loc.GetString("vamp-bite-popup", ("{Victim}", name));
+            var popup = Loc.GetString("vamp-bite-popup", ("{$victim}", name));
             _popup.PopupEntity(popup, target, PopupType.LargeCaution);
-                
-            // Bite removal is handled by VampireComponent shutdown in VampireRoleSystem
+
+            EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
         }
     }
 }
