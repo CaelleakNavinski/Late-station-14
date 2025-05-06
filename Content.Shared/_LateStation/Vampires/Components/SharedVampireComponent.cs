@@ -13,7 +13,7 @@ namespace Content.Shared._LateStation.Vampires.Components
     [NetworkedComponent]
     [AutoGenerateComponentState]
     [Access(typeof(SharedVampireSystem))]
-    public sealed partial class VampireSharedComponent : Component
+    public sealed partial class SharedVampireComponent : Component
     {
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("statusIcon")]
