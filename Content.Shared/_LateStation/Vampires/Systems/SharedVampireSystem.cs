@@ -16,16 +16,16 @@ namespace Content.Shared._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
-            SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
+            SubscribeLocalEvent<SharedVampireComponent, ComponentInit>(OnVampireInit);
+            SubscribeLocalEvent<SharedVampireComponent, ComponentShutdown>(OnVampireShutdown);
         }
 
-        private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
+        private void OnVampireInit(EntityUid uid, SharedVampireComponent comp, ComponentInit args)
         {
             _actions.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
         }
 
-        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
+        private void OnVampireShutdown(EntityUid uid, SharedVampireComponent comp, ComponentShutdown args)
         {
             _actions.RemoveAction(uid, comp.BiteActionEntity);
         }
