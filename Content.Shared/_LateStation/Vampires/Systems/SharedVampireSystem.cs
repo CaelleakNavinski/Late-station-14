@@ -1,6 +1,7 @@
 using Content.Shared.Actions;
 using Robust.Shared.GameStates;
 using Robust.Shared.GameObjects;
+using Content.Shared._LateStation.Vampires.Components;
 
 namespace Content.Shared._LateStation.Vampires.Systems
 {
