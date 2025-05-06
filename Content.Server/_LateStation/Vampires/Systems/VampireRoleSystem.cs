@@ -1,20 +1,18 @@
 using System;
 using System.Linq;
-using Content.Server.AlertLevel;                        // AlertLevelSystem
-using Content.Server.Station.Systems;                   // StationSystem
-using Content.Server.Chat.Systems;                      // ChatSystem
-using Content.Shared._LateStation.Vampires.Components;  // VampireComponent, VampireMatriarchComponent
-using Content.Shared.Actions;                           // SharedActionsSystem
-using Robust.Server.Player;                             // IPlayerManager
-using Robust.Shared.GameStates;                         // EntitySystem, ComponentInit, ComponentShutdown
-using Robust.Shared.IoC;                                // [Dependency]
-using Robust.Shared.GameObjects;                        // EntityQuery
+using Content.Server.AlertLevel;
+using Content.Server.Station.Systems;
+using Content.Server.Chat.Systems;
+using Content.Shared._LateStation.Vampires.Components;
+using Content.Shared.Actions;
+using Content.Shared.Damage.Components;
+using Robust.Server.Player;
+using Robust.Shared.GameStates;
+using Robust.Shared.IoC;
+using Robust.Shared.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
-    /// <summary>
-    /// Grants/removes the Bite action, buffs Matriarch HP, and triggers the Silver alert cap.
-    /// </summary>
     public sealed class VampireRoleSystem : EntitySystem
     {
         [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
@@ -26,54 +24,41 @@ namespace Content.Server._LateStation.Vampires.Systems
         public override void Initialize()
         {
             base.Initialize();
-
             SubscribeLocalEvent<VampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
-
             SubscribeLocalEvent<VampireMatriarchComponent, ComponentInit>(OnMatriarchInit);
             SubscribeLocalEvent<VampireMatriarchComponent, ComponentShutdown>(OnMatriarchShutdown);
         }
 
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
-            // Add the toggleable Bite action
-            _actionsSystem.AddAction(uid, ref comp.BiteActionEntity, comp.BiteActionPrototype);
-
-            // Check cap (min 3, 20% of players)
             var total = EntityQuery<VampireComponent>().Count();
             var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
             if (total >= cap)
                 TriggerSilverAlert(uid);
         }
 
-        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
-        {
-            _actionsSystem.RemoveAction(uid, comp.BiteActionEntity);
-        }
+        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args) { }
 
         private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
         {
-            if (TryComp<DamageableComponent>(uid, out var damageable))
+            if (TryComp<DamageableComponent>(uid, out var dmg))
             {
-                // Store original values
-                comp.OriginalMaxHP        = damageable.MaxHP;
-                comp.OriginalCritThreshold = damageable.CriticalThreshold;
-
-                // Give Matriarch +20 maxHP (to 120) and lower crit threshold by 20
-                damageable.MaxHP           = comp.OriginalMaxHP + 20f;
-                damageable.CurrentHP       = Math.Min(damageable.CurrentHP + (120f - comp.OriginalMaxHP), 120f);
-                damageable.CriticalThreshold = comp.OriginalCritThreshold - 20f;
+                comp.OriginalMaxHP         = dmg.MaxHP;
+                comp.OriginalCritThreshold = dmg.CriticalThreshold;
+                dmg.MaxHP                  = comp.OriginalMaxHP + 20f;
+                dmg.CurrentHP              = Math.Min(dmg.CurrentHP + (120f - comp.OriginalMaxHP), 120f);
+                dmg.CriticalThreshold      = comp.OriginalCritThreshold - 20f;
             }
         }
 
         private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
         {
-            if (TryComp<DamageableComponent>(uid, out var damageable))
+            if (TryComp<DamageableComponent>(uid, out var dmg))
             {
-                // Restore original values
-                damageable.MaxHP           = comp.OriginalMaxHP;
-                damageable.CriticalThreshold = comp.OriginalCritThreshold;
-                damageable.CurrentHP       = Math.Min(damageable.CurrentHP, damageable.MaxHP);
+                dmg.MaxHP             = comp.OriginalMaxHP;
+                dmg.CriticalThreshold = comp.OriginalCritThreshold;
+                dmg.CurrentHP         = Math.Min(dmg.CurrentHP, dmg.MaxHP);
             }
         }
 
@@ -81,23 +66,12 @@ namespace Content.Server._LateStation.Vampires.Systems
         {
             var station = _stations.GetOwningStation(uid);
             if (station == null) return;
-
-            _alerts.SetLevel(
-                station.Value,
-                "Silver",
-                playSound: true,
-                announce: true,
-                force: true);
-
+            _alerts.SetLevel(station.Value, "Silver", playSound: true, announce: true, force: true);
             const string msg =
                 "Scans have detected a significant escalation in vampiric activity aboard the station. " +
                 "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
                 "Avoid isolated areas and travel in groups when possible.";
-
-            _chat.DispatchStationAnnouncement(
-                station.Value,
-                msg,
-                playDefaultSound: false);
+            _chat.DispatchStationAnnouncement(station.Value, msg, playDefaultSound: false);
         }
     }
 }
