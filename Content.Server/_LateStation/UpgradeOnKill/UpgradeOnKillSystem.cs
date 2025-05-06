@@ -1,5 +1,5 @@
 using Content.Server.KillTracking;                           // KillTrackerComponent, KillReportedEvent
-using Content.Shared._LateStation.Vampires.Components;      // UpgradeOnKillComponent
+using Content.Shared._LateStation.UpgradeOnKill.Components;
 using Robust.Shared.GameStates;                             // EntitySystem, Dirty()
 using Robust.Shared.IoC;                                    // [Dependency]
 using Robust.Shared.GameObjects;                            // EntityManager, Transform()
@@ -22,7 +22,7 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void OnKillReported(EntityUid uid, KillTrackerComponent _, ref KillReportedEvent args)
         {
             // TryGetComponent now declares comp as nullable
-            if (!EntityManager.TryGetComponent(uid, out UpgradeOnKillComponent? comp))
+            if (!EntityManager.TryGetComponent<UpgradeOnKillComponent>(uid, out var comp))
                 return;
 
             // At this point comp is non-null

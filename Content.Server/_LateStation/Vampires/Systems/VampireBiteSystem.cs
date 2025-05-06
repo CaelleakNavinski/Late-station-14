@@ -1,4 +1,5 @@
 using Content.Shared.Popups;
+using Content.Server._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
 using Content.Shared.Humanoid;            // for HumanoidComponent
