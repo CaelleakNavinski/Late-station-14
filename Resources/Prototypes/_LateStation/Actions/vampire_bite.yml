@@ -7,7 +7,7 @@
       useDelay: 5
       range: 1
       icon:
-        sprite: Textures/_LateStation/Interface/Actions/vampire_bite.rsi
+        sprite: /Textures/_LateStation/Actions/vampire_bite.rsi
         state: icon
       itemIconStyle: BigAction
       priority: -10

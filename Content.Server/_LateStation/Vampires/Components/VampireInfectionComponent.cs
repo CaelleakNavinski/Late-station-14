@@ -28,12 +28,10 @@ namespace Content.Server._LateStation.Vampires.Components
 
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("previousTimeLeft")]
-        [AutoNetworkedField]
         public float PreviousTimeLeft { get; set; }
 
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("finalStage")]
-        [AutoNetworkedField]
         public int FinalStage { get; set; }
 
         public float[] FinalThresholds { get; set; } = new float[] { 30f, 20f, 10f, 5f, 2f };
