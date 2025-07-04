@@ -1,49 +1,56 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Server.Antag;
 using Content.Server.Chat.Systems;
 using Content.Server.GameTicking.Rules;
-using Content.Server._LateStation.GameTicking.Rules.Components;
+using Content.Server.GameTicking.Rules.Components;
 using Content.Server.Mind;
+using Content.Server.Popups;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Server.Shuttles.Systems;
 using Content.Server.Station.Systems;
-using Content.Shared.GameTicking.Components;
+using Content.Shared.Humanoid;
+using Content.Shared.Zombies;
 using Content.Shared.GameTicking.Events;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.IoC;
+using Robust.Shared.Localization;
 using Robust.Shared.Player;
 using Robust.Shared.Random;
-using Robust.Shared.Localization;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
     /// <summary>
-    /// Controls the Vampire matriarch assignment and win/loss based on converting ≥2/5 of the crew.
-    /// Mirrors other GameRuleSystem implementations.
+    /// Where all the main stuff for Vampires happens:
+    /// Assigning Matriarchs, preventing bites on immune targets,
+    /// and checking for the game to end.
     /// </summary>
     public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
     {
-        [Dependency] private readonly IRobustRandom _random = default!;
-        [Dependency] private readonly ChatSystem _chat = default!;
-        [Dependency] private readonly RoleSystem _roles = default!;
+        [Dependency] private readonly AntagSelectionSystem _antag = default!;
+        [Dependency] private readonly IAdminLogManager _adminLog = default!;
+        [Dependency] private readonly IGameTiming _timing = default!;
+        [Dependency] private readonly ISharedPlayerManager _players = default!;
+        [Dependency] private readonly MindSystem _mind = default!;
+        [Dependency] private readonly PopupSystem _popup = default!;
+        [Dependency] private readonly RoleSystem _role = default!;
         [Dependency] private readonly RoundEndSystem _roundEnd = default!;
         [Dependency] private readonly StationSystem _station = default!;
         [Dependency] private readonly EmergencyShuttleSystem _shuttle = default!;
-        [Dependency] private readonly ISharedPlayerManager _players = default!;
+        [Dependency] private readonly IRobustRandom _random = default!;
 
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<VampireRuleComponent, RoundStartEvent>(OnRoundStart);
-            SubscribeLocalEvent<VampireRuleComponent, RoundEndTextAppendEvent>(OnAppendRoundEndText);
+
             SubscribeLocalEvent<VampireRoleComponent, GetBriefingEvent>(OnGetBriefing);
+            SubscribeLocalEvent<VampireBiteActionEvent>(OnVampireBite);
+            SubscribeLocalEvent<VampireRuleComponent, RoundEndTextAppendEvent>(OnAppendRoundEndText);
         }
 
         private void OnGetBriefing(EntityUid uid, VampireRoleComponent comp, ref GetBriefingEvent args)
@@ -53,84 +60,88 @@ namespace Content.Server._LateStation.GameTicking.Rules
             args.Append(Loc.GetString(isMatriarch ? "vamp-mat-briefing" : "vamp-briefing"));
         }
 
-        private void OnRoundStart(EntityUid uid, VampireRuleComponent comp, RoundStartEvent args)
+        private void OnVampireBite(VampireBiteActionEvent ev)
         {
-            var allPlayers = _players.Sessions
-                .Select(s => s.AttachedEntity)
-                .Where(e => e != null)
-                .Cast<EntityUid>()
-                .ToList();
+            var user = ev.Performer;
+            var target = ev.Target;
 
-            if (allPlayers.Count == 0)
-                return;
-
-            var shuffled = allPlayers.OrderBy(_ => _random.Next()).ToList();
-
-            // Assign exactly comp.MatriarchCount matriarchs
-            for (var i = 0; i < comp.MatriarchCount && i < shuffled.Count; i++)
+            if (!HasComp<HumanoidAppearanceComponent>(target) || HasComp<ZombieComponent>(target))
             {
-                var target = shuffled[i];
-                EnsureComp<VampireMatriarchComponent>(target);
-                _chat.DispatchServerAnnouncement(
-                    Loc.GetString("vamp-matriarch-assigned", ("player", Identity.Entity(target))),
-                    playDefaultSound: true);
+                 _popup.PopupEntity(
+                    Loc.GetString("vamp-target-immune-misc-popup", ("victim", Identity.Entity(target))),
+                    user,
+                    PopupType.SmallCaution);
+                return;
+            }
+            
+            // 1) VampireImmuneComponent blocks all bites
+            if (HasComp<VampireImmuneComponent>(target))
+            {
+                _popup.PopupEntity(
+                    Loc.GetString("vamp-target-immune-aura-popup", ("victim", Identity.Entity(target))),
+                    user,
+                    PopupType.SmallCaution);
+                _popup.PopupEntity(
+                    Loc.GetString("vamp-victim-immune-aura-popup", ("vamp", Identity.Entity(user))),
+                    target,
+                    PopupType.SmallCaution);
+                return;
+            }
+
+            // 2) SharedVampireComponent on target also blocks bites
+            if (HasComp<SharedVampireComponent>(target))
+            {
+                _popup.PopupEntity(
+                    Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", Identity.Entity(target))),
+                    user,
+                    PopupType.SmallCaution);
+                return;
+            }
+
+            // 3) Otherwise count as a conversion for the actor’s Matriarch stats
+            if (_mind.TryGetMind(user, out var mindId, out _) &&
+                _role.MindHasRole<VampireRoleComponent>(mindId, out var role))
+            {
+                role.Value.Comp2.ConvertedCount++;
             }
         }
 
-        protected override void AppendRoundEndText(EntityUid uid, VampireRuleComponent comp, GameRuleComponent gameRule, ref RoundEndTextAppendEvent args)
+        private void OnAppendRoundEndText(EntityUid uid, VampireRuleComponent comp, RoundEndTextAppendEvent args)
         {
-            base.AppendRoundEndText(uid, comp, gameRule, ref args);
-
-            // Gather matriarchs
-            var matriarchs = AllEntityQuery<VampireMatriarchComponent>()
-                .Select(x => x.Item1)
-                .ToList();
-
-            // If no matriarchs ever assigned or all died before start
-            if (matriarchs.Count == 0)
+            // Determine outcomes
+            var matriarchs = AllEntityQuery<VampireMatriarchComponent>();
+            var aliveMat = 0;
+            foreach (var (ent, _) in matriarchs)
             {
-                args.AddLine(Loc.GetString("vamp-no-matriarch"));
-                return;
+                if (TryComp<MobStateComponent>(ent, out var state) && state.CurrentState != MobState.Dead)
+                    aliveMat++;
             }
 
-            // Check if any matriarch is alive
-            var aliveMatriarchs = matriarchs.Count(m =>
-                TryComp<MobStateComponent>(m, out var state) && state.CurrentState != MobState.Dead);
-
-            // Count converted vampires (excluding matriarchs)
-            var convertedCount = AllEntityQuery<SharedVampireComponent>()
-                .Count(x => !HasComp<VampireMatriarchComponent>(x.Item1));
-
-            // Total players at round start
-            var totalPlayers = _players.Sessions.Count();
+            var totalPlayers = _players.Sessions.Count;
+            var converted = AllEntityQuery<SharedVampireComponent>()
+                .Count(e => !HasComp<VampireMatriarchComponent>(e.Item1));
             var required = (int)Math.Floor(totalPlayers * 0.4f);
 
             string outcome;
-            if (aliveMatriarchs > 0 && convertedCount >= required)
+            if (aliveMat > 0 && converted >= required)
                 outcome = "vamp-won";
-            else if (aliveMatriarchs == 0)
+            else if (aliveMat <= 0)
                 outcome = "vamp-lost";
             else
                 outcome = "vamp-stalemate";
 
             args.AddLine(Loc.GetString(outcome));
-
-            // List matriarch conversion counts
             args.AddLine(Loc.GetString("vamp-mat-count"));
-            var sessionData = _players.Sessions
-                .Select(s => s.AttachedEntity)
-                .Where(e => e != null)
-                .Cast<EntityUid>()
-                .Where(e => HasComp<VampireMatriarchComponent>(e));
 
-            foreach (var mat in sessionData)
+            var sessionData = _antag.GetAntagIdentifiers(uid);
+            foreach (var (mind, data, name) in sessionData)
             {
-                if (_roles.MindHasRole<VampireRoleComponent>(mat, out var role))
+                if (_role.MindHasRole<VampireRoleComponent>(mind, out var role))
                 {
                     var count = role.Value.Comp2.ConvertedCount;
                     args.AddLine(Loc.GetString("vamp-mat-name-user",
-                        ("name", Identity.Entity(mat)),
-                        ("username", role.Value.Comp2.Owner),
+                        ("name", name),
+                        ("username", data.UserName),
                         ("count", count)));
                 }
             }
