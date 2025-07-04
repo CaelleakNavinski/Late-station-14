@@ -22,11 +22,6 @@ using Robust.Shared.Random;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
-    /// <summary>
-    /// Where all the main stuff for Vampires happens:
-    /// Assigning Matriarchs, preventing bites on immune targets,
-    /// and checking for the game to end.
-    /// </summary>
     public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
     {
         [Dependency] private readonly AntagSelectionSystem _antag = default!;
