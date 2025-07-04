@@ -27,22 +27,21 @@ namespace Content.Client._LateStation.Vampires.Systems
 
         private void OnVampireIcon(EntityUid uid, SharedVampireComponent comp, ref GetStatusIconsEvent args)
         {
-            // Matriarchs will get handled by OnMatriarchIcon instead
             if (HasComp<SharedVampireMatriarchComponent>(uid))
                 return;
 
-            if (_prototype.TryIndex<FactionIconPrototype>(comp.StatusIcon, out var icon))
+            if (_prototype.TryIndex<FactionIconPrototype>(comp.StatusIcon, out var icon) && icon != null)
                 args.StatusIcons.Add(icon);
         }
 
         private void OnMatriarchIcon(EntityUid uid, SharedVampireMatriarchComponent _, ref GetStatusIconsEvent args)
         {
-            // SharedVampireMatriarchComponent is only a marker; pull icon from SharedVampireComponent
             if (!EntityManager.TryGetComponent(uid, out SharedVampireComponent vampComp))
                 return;
 
-            if (_prototype.TryIndex<FactionIconPrototype>(vampComp.StatusIcon, out var icon))
+            if (_prototype.TryIndex<FactionIconPrototype>(vampComp.StatusIcon, out var icon) && icon != null)
                 args.StatusIcons.Add(icon);
         }
+
     }
 }
