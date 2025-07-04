@@ -1,14 +1,15 @@
 using System;
-using System.Linq;                                         // For LINQ and Count()
+using System.Linq;                                              // For LINQ and Count()
 using Content.Server.Antag;
-using Content.Server._LateStation.GameTicking.Rules.Components;  // VampireRuleComponent
+using Content.Server.Roles;                                     // GetBriefingEvent, RoleSystem
+using Content.Server._LateStation.GameTicking.Rules.Components; // VampireRuleComponent
 using Content.Server._LateStation.Roles;                        // VampireRoleComponent
 using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;                                   // GetBriefingEvent
-using Content.Server.GameTicking.Components;                    // RoundEndTextAppendEvent
+using Content.Server.GameTicking;                               // RoundEndTextAppendEvent
 using Content.Shared.Mind.Components;
-using Content.Shared.Mobs;                                       // MobState enum
-using Content.Shared.Mobs.Components;                            // MobStateComponent
+using Content.Shared.Mobs;                                      // MobState enum
+using Content.Shared.Mobs.Components;                           // MobStateComponent
 using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
