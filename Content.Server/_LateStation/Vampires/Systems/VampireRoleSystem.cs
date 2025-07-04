@@ -7,6 +7,7 @@ using Content.Server.Mind;                              // MindSystem
 using Content.Server.Roles;                             // RoleSystem, VampireRoleComponent
 using Content.Server.Station.Systems;
 using Content.Shared.Mind.Components;                   // MindComponent
+using Content.Shared.Actions;
 using Content.Shared._LateStation.Vampires.Components;  // SharedVampireComponent
 using Content.Server._LateStation.Vampires.Components; // VampireComponent, VampireMatriarchComponent
 using Robust.Shared.IoC;
