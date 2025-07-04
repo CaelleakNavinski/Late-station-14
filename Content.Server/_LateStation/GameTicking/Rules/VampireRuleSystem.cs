@@ -23,7 +23,7 @@ namespace Content.Server._LateStation.GameTicking.Rules
     public sealed class VampireRuleSystem : EntitySystem
     {
         [Dependency] private readonly AntagSelectionSystem _antag = default!;
-        [Dependency] private readonly ISharedPlayerManager _players = default!;
+        [Dependency] private readonly IPlayerManager _players = default!;
         [Dependency] private readonly RoleSystem _role = default!;
 
         public override void Initialize()
@@ -60,11 +60,11 @@ namespace Content.Server._LateStation.GameTicking.Rules
                     converted++;
             }
 
-            var required = (int)Math.Floor(_players.Sessions.Count * 0.4f);
+            var required = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.4f));
 
             string outcome = aliveMat > 0 && converted >= required
                 ? "vamp-won"
-                : aliveMat == 0
+                : aliveMat <= 0
                     ? "vamp-lost"
                     : "vamp-stalemate";
 
