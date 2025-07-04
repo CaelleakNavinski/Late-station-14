@@ -6,13 +6,10 @@ using Content.Server.Chat.Systems;
 using Content.Server.GameTicking.Rules;
 using Content.Server.GameTicking.Rules.Components;
 using Content.Server.Mind;
-using Content.Server.Popups;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Server.Shuttles.Systems;
 using Content.Server.Station.Systems;
-using Content.Shared.Humanoid;
-using Content.Shared.Zombies;
 using Content.Shared.GameTicking.Events;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Mind.Components;
@@ -37,7 +34,6 @@ namespace Content.Server._LateStation.GameTicking.Rules
         [Dependency] private readonly IGameTiming _timing = default!;
         [Dependency] private readonly ISharedPlayerManager _players = default!;
         [Dependency] private readonly MindSystem _mind = default!;
-        [Dependency] private readonly PopupSystem _popup = default!;
         [Dependency] private readonly RoleSystem _role = default!;
         [Dependency] private readonly RoundEndSystem _roundEnd = default!;
         [Dependency] private readonly StationSystem _station = default!;
@@ -49,7 +45,6 @@ namespace Content.Server._LateStation.GameTicking.Rules
             base.Initialize();
 
             SubscribeLocalEvent<VampireRoleComponent, GetBriefingEvent>(OnGetBriefing);
-            SubscribeLocalEvent<VampireBiteActionEvent>(OnVampireBite);
             SubscribeLocalEvent<VampireRuleComponent, RoundEndTextAppendEvent>(OnAppendRoundEndText);
         }
 
@@ -58,52 +53,6 @@ namespace Content.Server._LateStation.GameTicking.Rules
             var ent = args.Mind.Comp.OwnedEntity;
             var isMatriarch = HasComp<VampireMatriarchComponent>(ent);
             args.Append(Loc.GetString(isMatriarch ? "vamp-mat-briefing" : "vamp-briefing"));
-        }
-
-        private void OnVampireBite(VampireBiteActionEvent ev)
-        {
-            var user = ev.Performer;
-            var target = ev.Target;
-
-            if (!HasComp<HumanoidAppearanceComponent>(target) || HasComp<ZombieComponent>(target))
-            {
-                 _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-misc-popup", ("victim", Identity.Entity(target))),
-                    user,
-                    PopupType.SmallCaution);
-                return;
-            }
-            
-            // 1) VampireImmuneComponent blocks all bites
-            if (HasComp<VampireImmuneComponent>(target))
-            {
-                _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-aura-popup", ("victim", Identity.Entity(target))),
-                    user,
-                    PopupType.SmallCaution);
-                _popup.PopupEntity(
-                    Loc.GetString("vamp-victim-immune-aura-popup", ("vamp", Identity.Entity(user))),
-                    target,
-                    PopupType.SmallCaution);
-                return;
-            }
-
-            // 2) SharedVampireComponent on target also blocks bites
-            if (HasComp<SharedVampireComponent>(target))
-            {
-                _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", Identity.Entity(target))),
-                    user,
-                    PopupType.SmallCaution);
-                return;
-            }
-
-            // 3) Otherwise count as a conversion for the actor’s Matriarch stats
-            if (_mind.TryGetMind(user, out var mindId, out _) &&
-                _role.MindHasRole<VampireRoleComponent>(mindId, out var role))
-            {
-                role.Value.Comp2.ConvertedCount++;
-            }
         }
 
         private void OnAppendRoundEndText(EntityUid uid, VampireRuleComponent comp, RoundEndTextAppendEvent args)
