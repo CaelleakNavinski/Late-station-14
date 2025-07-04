@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using Content.Server.Antag;
+using Content.Server._LateStation.Roles;
+using Content.Server.GameTicking;
 using Content.Server.Roles;
-using Content.Shared.GameTicking;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared._LateStation.Vampires.Components;
