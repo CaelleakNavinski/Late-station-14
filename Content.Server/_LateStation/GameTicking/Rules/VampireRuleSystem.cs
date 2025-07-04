@@ -5,7 +5,7 @@ using Content.Server.Antag;
 using Content.Server.GameTicking.Rules;
 using Content.Server.Roles;
 using Content.Server._LateStation.GameTicking.Rules.Components;
-using Content.Shared.GameTicking.Events;
+using Content.Server.GameTicking
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared._LateStation.Vampires.Components;
