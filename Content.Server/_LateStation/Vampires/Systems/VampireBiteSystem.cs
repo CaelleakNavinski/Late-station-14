@@ -1,11 +1,11 @@
-using Content.Shared.IdentityManagement;                       // Identity.Entity
+using Content.Shared.IdentityManagement;        // for Identity.Entity
 using Content.Shared.Popups;
-using Content.Server._LateStation.Vampires.Components;        // VampireImmuneComponent
+using Content.Server._LateStation.Vampires.Components; // for VampireImmuneComponent, VampireInfectionComponent, VampireBiteToggleComponent
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared._LateStation.Vampires.Events;
-using Content.Shared.Humanoid;                                // HumanoidAppearanceComponent
-using Content.Shared.Zombies;                                 // ZombieComponent
-using Robust.Server.GameObjects;                              // EntityManager
+using Content.Shared.Humanoid;                 // for HumanoidAppearanceComponent
+using Content.Shared.Zombies;                  // for ZombieComponent
+using Robust.Server.GameObjects;               // for EntityManager
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
@@ -27,25 +27,28 @@ namespace Content.Server._LateStation.Vampires.Systems
             var user = ev.Performer;
             var target = ev.Target;
 
-            // Only bite humanoids (not zombies or animals)
+            // Only humanoid, not zombie
             if (!HasComp<HumanoidAppearanceComponent>(target) || HasComp<ZombieComponent>(target))
             {
                 _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-misc-popup", ("victim", Identity.Entity(target))),
+                    Loc.GetString("vamp-target-immune-misc-popup",
+                        ("victim", Identity.Entity(target, EntityManager))),
                     user,
                     PopupType.SmallCaution);
                 return;
             }
 
-            // VampireImmuneComponent blocks all bites
+            // VampireImmuneComponent blocks bites
             if (HasComp<VampireImmuneComponent>(target))
             {
                 _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-aura-popup", ("victim", Identity.Entity(target, EntityManager))),
+                    Loc.GetString("vamp-target-immune-aura-popup",
+                        ("victim", Identity.Entity(target, EntityManager))),
                     user,
                     PopupType.SmallCaution);
                 _popup.PopupEntity(
-                    Loc.GetString("vamp-victim-immune-aura-popup", ("vamp", Identity.Entity(user, EntityManager))),
+                    Loc.GetString("vamp-victim-immune-aura-popup",
+                        ("vamp", Identity.Entity(user, EntityManager))),
                     target,
                     PopupType.SmallCaution);
                 return;
@@ -55,7 +58,8 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (HasComp<SharedVampireComponent>(target))
             {
                 _popup.PopupEntity(
-                    Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", Identity.Entity(target, EntityManager))),
+                    Loc.GetString("vamp-target-immune-other-vamp-popup",
+                        ("victim", Identity.Entity(target, EntityManager))),
                     user,
                     PopupType.SmallCaution);
                 return;
@@ -65,7 +69,8 @@ namespace Content.Server._LateStation.Vampires.Systems
             EntityManager.AddComponent<VampireInfectionComponent>(target);
 
             // Flavor popup
-            var popup = Loc.GetString("vamp-bite-popup", ("{$victim}", Identity.Entity(target, EntityManager)));
+            var popup = Loc.GetString("vamp-bite-popup",
+                ("{$victim}", Identity.Entity(target, EntityManager)));
             _popup.PopupEntity(popup, target, PopupType.LargeCaution);
 
             EntityManager.RemoveComponent<VampireBiteToggleComponent>(user);
