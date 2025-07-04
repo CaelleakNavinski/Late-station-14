@@ -1,18 +1,15 @@
 using System;
-using System.Linq;
-using Content.Server.Administration.Logs;
+using System.Linq;                                            // Enumerable extensions
 using Content.Server.Antag;
-using Content.Server.GameTicking.Rules;
 using Content.Server.Roles;
 using Content.Server._LateStation.GameTicking.Rules.Components;
-using Content.Server.GameTicking;
+using Content.Shared.GameTicking.Components;                   // RoundEndTextAppendEvent, RoundStartEvent
 using Content.Shared.Mind.Components;
-using Content.Shared.Mobs.Components;
-using Content.Shared._LateStation.Vampires.Components;
+using Content.Shared.Mobs.Components;                         // MobStateComponent
+using Content.Shared._LateStation.Vampires.Components;        // VampireMatriarchComponent, SharedVampireComponent
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
 using Robust.Shared.Player;
-using Robust.Shared.Random;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
@@ -41,34 +38,35 @@ namespace Content.Server._LateStation.GameTicking.Rules
 
         private void OnAppendRoundEndText(EntityUid uid, VampireRuleComponent comp, RoundEndTextAppendEvent args)
         {
-            var matriarchs = AllEntityQuery<VampireMatriarchComponent>();
-            var aliveMat = matriarchs.Count(m => TryComp<MobStateComponent>(m.Item1, out var state) && state.CurrentState != MobState.Dead);
+            // Count alive matriarchs
+            var aliveMat = AllEntityQuery<VampireMatriarchComponent>()
+                .Select(q => q.Item1)
+                .Count(e => TryComp<MobStateComponent>(e, out var st) && st.CurrentState != MobState.Dead);
 
             var totalPlayers = _players.Sessions.Count;
-            var converted = AllEntityQuery<SharedVampireComponent>().Count(e => !HasComp<VampireMatriarchComponent>(e.Item1));
+            var converted = AllEntityQuery<SharedVampireComponent>()
+                .Select(q => q.Item1)
+                .Count(e => !HasComp<VampireMatriarchComponent>(e));
+
             var required = (int)Math.Floor(totalPlayers * 0.4f);
 
-            string outcome;
-            if (aliveMat > 0 && converted >= required)
-                outcome = "vamp-won";
-            else if (aliveMat == 0)
-                outcome = "vamp-lost";
-            else
-                outcome = "vamp-stalemate";
+            var outcome = aliveMat > 0 && converted >= required
+                ? "vamp-won"
+                : aliveMat == 0
+                    ? "vamp-lost"
+                    : "vamp-stalemate";
 
             args.AddLine(Loc.GetString(outcome));
             args.AddLine(Loc.GetString("vamp-mat-count"));
 
-            var sessionData = _antag.GetAntagIdentifiers(uid);
-            foreach (var (mind, data, name) in sessionData)
+            foreach (var (mind, data, name) in _antag.GetAntagIdentifiers(uid))
             {
                 if (_role.MindHasRole<VampireRoleComponent>(mind, out var role))
                 {
-                    var count = role.Value.Comp2.ConvertedCount;
                     args.AddLine(Loc.GetString("vamp-mat-name-user",
                         ("name", name),
                         ("username", data.UserName),
-                        ("count", count)));
+                        ("count", role.Value.Comp2.ConvertedCount)));
                 }
             }
         }
