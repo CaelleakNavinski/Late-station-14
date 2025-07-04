@@ -16,20 +16,20 @@ public sealed class VampireClientSystem : SharedVampireSystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<VampireComponent, GetStatusIconsEvent>(GetVampIcon);
-        SubscribeLocalEvent<VampireMatriarchComponent, GetStatusIconsEvent>(GetVampMatIcon);
+        SubscribeLocalEvent<SharedVampireComponent, GetStatusIconsEvent>(GetVampIcon);
+        SubscribeLocalEvent<SharedVampireMatriarchComponent, GetStatusIconsEvent>(GetVampMatIcon);
     }
 
-    private void GetVampIcon(Entity<VampireComponent> ent, ref GetStatusIconsEvent args)
+    private void GetVampIcon(Entity<SharedVampireComponent> ent, ref GetStatusIconsEvent args)
     {
-        if (HasComp<VampireMatriarchComponent>(ent))
+        if (HasComp<SharedVampireMatriarchComponent>(ent))
             return;
 
         if (_prototype.TryIndex(ent.Comp.StatusIcon, out var iconPrototype))
             args.StatusIcons.Add(iconPrototype);
     }
 
-    private void GetVampMatIcon(Entity<VampireMatriarchComponent> ent, ref GetStatusIconsEvent args)
+    private void GetVampMatIcon(Entity<SharedVampireMatriarchComponent> ent, ref GetStatusIconsEvent args)
     {
         if (_prototype.TryIndex(ent.Comp.StatusIcon, out var iconPrototype))
             args.StatusIcons.Add(iconPrototype);
