@@ -1,42 +1,37 @@
-using Robust.Shared.GameObjects;
-using Robust.Shared.Prototypes;
 using Content.Shared._LateStation.Vampires.Components;
-using Content.Shared.StatusIcon;
+using Content.Shared._LateStation.Vampires.Systems;
 using Content.Shared.StatusIcon.Components;
+using Robust.Shared.Prototypes;
 
-namespace Content.Client._LateStation.Vampires.Systems
+namespace Content.Client._LateStation.Vampires.Systems;
+
+/// <summary>
+/// Used for the client to get status icons from other vamps.
+/// </summary>
+public sealed class VampireClientSystem : SharedVampireSystem
 {
-    /// <summary>
-    /// Used for the client to get vampire status icons
-    /// via the unified GetStatusIconsEvent pipeline, mirroring RevolutionarySystem.
-    /// </summary>
-    public sealed class VampireClientSystem : SharedVampireSystem
+    [Dependency] private readonly IPrototypeManager _prototype = default!;
+
+    public override void Initialize()
     {
-        [Dependency] private readonly IPrototypeManager _prototype = default!;
+        base.Initialize();
 
-        public override void Initialize()
-        {
-            base.Initialize();
-            SubscribeLocalEvent<SharedVampireComponent, GetStatusIconsEvent>(OnGetVampireIcon);
-            SubscribeLocalEvent<SharedVampireMatriarchComponent, GetStatusIconsEvent>(OnGetMatriarchIcon);
-        }
+        SubscribeLocalEvent<VampireComponent, GetStatusIconsEvent>(GetVampIcon);
+        SubscribeLocalEvent<VampireMatriarchComponent, GetStatusIconsEvent>(GetVampMatIcon);
+    }
 
-        private void OnGetVampireIcon(EntityUid uid, SharedVampireComponent comp, ref GetStatusIconsEvent args)
-        {
-            if (_prototype.TryIndex(comp.StatusIcon, out FactionIconPrototype iconProto))
-            {
-                args.StatusIcons.Add(iconProto);
-            }
-        }
+    private void GetVampIcon(Entity<VampireComponent> ent, ref GetStatusIconsEvent args)
+    {
+        if (HasComp<VampireMatriarchComponent>(ent))
+            return;
 
-        private void OnGetMatriarchIcon(EntityUid uid, SharedVampireMatriarchComponent comp, ref GetStatusIconsEvent args)
-        {
-            // Matriarchs use the same icon by default, or override via SharedVampireMatriarchComponent
-            var protoId = comp.StatusIconOverride ?? comp.StatusIcon;
-            if (_prototype.TryIndex(protoId, out FactionIconPrototype iconProto))
-            {
-                args.StatusIcons.Add(iconProto);
-            }
-        }
+        if (_prototype.TryIndex(ent.Comp.StatusIcon, out var iconPrototype))
+            args.StatusIcons.Add(iconPrototype);
+    }
+
+    private void GetVampMatIcon(Entity<VampireMatriarchComponent> ent, ref GetStatusIconsEvent args)
+    {
+        if (_prototype.TryIndex(ent.Comp.StatusIcon, out var iconPrototype))
+            args.StatusIcons.Add(iconPrototype);
     }
 }
