@@ -20,10 +20,6 @@ namespace Content.Shared._LateStation.Vampires.Components
         [AutoNetworkedField]
         public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
 
-        [DataField("vampStartSound")]
-        public SoundSpecifier VampireStartSound { get; set; } =
-            new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
-
         [ViewVariables(VVAccess.ReadWrite)]
         [DataField("biteActionPrototype")]
         [AutoNetworkedField]
@@ -33,6 +29,8 @@ namespace Content.Shared._LateStation.Vampires.Components
         [DataField("biteActionEntity"), AutoNetworkedField]
         public EntityUid? BiteActionEntity;
 
+        [DataField]
+        public SoundSpecifier VampStartSound = new SoundPathSpecifier("/Audio/Antag/vampire_start.ogg");
         public override bool SessionSpecific => true;
     }
 }
