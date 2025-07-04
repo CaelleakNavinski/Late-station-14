@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Content.Server.Antag;
 using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
@@ -14,11 +15,13 @@ using Robust.Server.Player;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
 using Robust.Shared.GameObjects;
+using Robust.Server.GameObjects;
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
     public sealed class VampireRoleSystem : EntitySystem
     {
+        [Dependency] private readonly AntagSelectionSystem _antag = default!;
         [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
         [Dependency] private readonly IPlayerManager _players = default!;
         [Dependency] private readonly AlertLevelSystem _alerts = default!;
@@ -44,9 +47,19 @@ namespace Content.Server._LateStation.Vampires.Systems
                 TriggerSilverAlert(uid);
 
             // Add the "Vampire" mind‐role
-            if (_mind.TryGetMind(uid, out var mindId, out _))
+            if (_mind.TryGetMind(uid, out var mindId, out var mind) && mind.UserId is { })
             {
                 _role.MindAddRole(mindId, "MindRoleVampire");
+
+                // Send briefing sound and text
+                if (_players.TryGetSessionById(mind.UserId, out var session))
+                {
+                    var shared = EntityManager.GetComponent<SharedVampireComponent>(uid);
+                    _antag.SendBriefing(session,
+                        Loc.GetString("vamp-role-greeting"),
+                        Color.Red,
+                        shared.VampStartSound);
+                }
             }
         }
 
