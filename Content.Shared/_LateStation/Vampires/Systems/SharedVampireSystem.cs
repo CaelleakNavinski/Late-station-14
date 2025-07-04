@@ -2,6 +2,7 @@ using System;
 using Content.Shared.Actions;
 using Content.Shared.Popups;
 using Content.Shared.StatusIcon.Components;
+using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
