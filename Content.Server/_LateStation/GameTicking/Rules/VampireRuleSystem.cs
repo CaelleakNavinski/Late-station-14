@@ -1,24 +1,23 @@
 using System;
-using System.Linq;
+using System.Linq;                                         // For LINQ and Count()
 using Content.Server.Antag;
-using Content.Server._LateStation.Roles;
-using Content.Server.GameTicking;
-using Content.Server.Roles;
-using Content.Shared.Mind.Components;
-using Content.Shared.Mobs.Components;
-using Content.Shared._LateStation.Vampires.Components;
+using Content.Server._LateStation.GameTicking.Rules.Components;  // VampireRuleComponent
+using Content.Server._LateStation.Roles;                        // VampireRoleComponent
 using Content.Server._LateStation.Vampires.Components;
+using Content.Shared.Actions;                                   // GetBriefingEvent
+using Content.Server.GameTicking.Components;                    // RoundEndTextAppendEvent
+using Content.Shared.Mind.Components;
+using Content.Shared.Mobs;                                       // MobState enum
+using Content.Shared.Mobs.Components;                            // MobStateComponent
+using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
 using Robust.Shared.Player;
-using Robust.Shared.Random;
-using Robust.Shared.GameObjects;
-using Content.Server._LateStation.GameTicking.Rules.Components;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
     /// <summary>
-    /// Evaluates vampire win/loss conditions at round end.
+    /// Evaluates vampire win/loss conditions at round end and provides briefings.
     /// </summary>
     public sealed class VampireRuleSystem : EntitySystem
     {
@@ -44,24 +43,20 @@ namespace Content.Server._LateStation.GameTicking.Rules
         {
             // Count alive matriarchs
             var aliveMat = 0;
-            var matriarchs = AllEntityQuery<VampireMatriarchComponent>();
-            while (matriarchs.MoveNext(out var ent, out _))
+            var mats = AllEntityQuery<VampireMatriarchComponent>();
+            while (mats.MoveNext(out var matEnt, out _))
             {
-                if (TryComp<MobStateComponent>(ent, out var mob) && mob.CurrentState != MobState.Dead)
+                if (TryComp<MobStateComponent>(matEnt, out var state) && state.CurrentState != MobState.Dead)
                     aliveMat++;
             }
 
-            var converted = 0;
-            var vamps = AllEntityQuery<SharedVampireComponent>();
-            while (vamps.MoveNext(out var ent, out _))
-            {
-                if (!HasComp<VampireMatriarchComponent>(ent))
-                    converted++;
-            }
+            // Count converted vampires (excluding matriarchs)
+            var converted = AllEntityQuery<SharedVampireComponent>()
+                .Count(q => !HasComp<VampireMatriarchComponent>(q.Item1));
 
-            var required = (int)Math.Floor(_players.Sessions.Count * 0.4f);
+            var required = (int)Math.Floor(_players.Sessions.Count() * 0.4f);
 
-            string outcome = (aliveMat > 0 && converted >= required)
+            string outcome = aliveMat > 0 && converted >= required
                 ? "vamp-won"
                 : aliveMat == 0
                     ? "vamp-lost"
