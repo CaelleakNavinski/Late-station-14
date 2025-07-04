@@ -52,10 +52,15 @@ namespace Content.Server._LateStation.GameTicking.Rules
             }
 
             // Count converted vampires (excluding matriarchs)
-            var converted = AllEntityQuery<SharedVampireComponent>()
-                .Count(q => !HasComp<VampireMatriarchComponent>(q.Item1));
+            var converted = 0;
+            var vamps = AllEntityQuery<SharedVampireComponent>();
+            while (vamps.MoveNext(out var vampEnt, out _))
+            {
+                if (!HasComp<VampireMatriarchComponent>(vampEnt))
+                    converted++;
+            }
 
-            var required = (int)Math.Floor(_players.Sessions.Count() * 0.4f);
+            var required = (int)Math.Floor(_players.Sessions.Count * 0.4f);
 
             string outcome = aliveMat > 0 && converted >= required
                 ? "vamp-won"
