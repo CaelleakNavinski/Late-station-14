@@ -1,0 +1,23 @@
+- type: factionIcon
+  id: VampireFaction
+  isShaded: true
+  priority: 11
+  showTo:
+    components:
+      - ShowAntagIcons
+      - Vampire
+  icon:
+    sprite: /Textures/_LateStation/Interface/Misc/job_icons.rsi
+    state: Vampire
+
+- type: factionIcon
+  id: VampireMatriarchFaction
+  isShaded: true
+  priority: 11
+  showTo:
+    components:
+      - ShowAntagIcons
+      - Vampire
+  icon:
+    sprite: /Textures/_LateStation/Interface/Misc/job_icons.rsi
+    state: VampireMatriarch
