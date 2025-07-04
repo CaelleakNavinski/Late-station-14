@@ -1,17 +1,11 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Server.Antag;
-using Content.Server.Chat.Systems;
 using Content.Server.GameTicking.Rules;
-using Content.Server.GameTicking.Rules.Components;
-using Content.Server.Mind;
 using Content.Server.Roles;
-using Content.Server.RoundEnd;
-using Content.Server.Shuttles.Systems;
-using Content.Server.Station.Systems;
+using Content.Server._LateStation.GameTicking.Rules.Components;
 using Content.Shared.GameTicking.Events;
-using Content.Shared.IdentityManagement;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared._LateStation.Vampires.Components;
@@ -22,25 +16,20 @@ using Robust.Shared.Random;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
+    /// <summary>
+    /// Controls Vampire matriarch assignment and win/loss based on converting ≥2/5 of the crew.
+    /// </summary>
     public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
     {
         [Dependency] private readonly AntagSelectionSystem _antag = default!;
-        [Dependency] private readonly IAdminLogManager _adminLog = default!;
-        [Dependency] private readonly IGameTiming _timing = default!;
         [Dependency] private readonly ISharedPlayerManager _players = default!;
-        [Dependency] private readonly MindSystem _mind = default!;
         [Dependency] private readonly RoleSystem _role = default!;
-        [Dependency] private readonly RoundEndSystem _roundEnd = default!;
-        [Dependency] private readonly StationSystem _station = default!;
-        [Dependency] private readonly EmergencyShuttleSystem _shuttle = default!;
-        [Dependency] private readonly IRobustRandom _random = default!;
 
         public override void Initialize()
         {
             base.Initialize();
-
-            SubscribeLocalEvent<VampireRoleComponent, GetBriefingEvent>(OnGetBriefing);
             SubscribeLocalEvent<VampireRuleComponent, RoundEndTextAppendEvent>(OnAppendRoundEndText);
+            SubscribeLocalEvent<VampireRoleComponent, GetBriefingEvent>(OnGetBriefing);
         }
 
         private void OnGetBriefing(EntityUid uid, VampireRoleComponent comp, ref GetBriefingEvent args)
@@ -52,24 +41,17 @@ namespace Content.Server._LateStation.GameTicking.Rules
 
         private void OnAppendRoundEndText(EntityUid uid, VampireRuleComponent comp, RoundEndTextAppendEvent args)
         {
-            // Determine outcomes
             var matriarchs = AllEntityQuery<VampireMatriarchComponent>();
-            var aliveMat = 0;
-            foreach (var (ent, _) in matriarchs)
-            {
-                if (TryComp<MobStateComponent>(ent, out var state) && state.CurrentState != MobState.Dead)
-                    aliveMat++;
-            }
+            var aliveMat = matriarchs.Count(m => TryComp<MobStateComponent>(m.Item1, out var state) && state.CurrentState != MobState.Dead);
 
             var totalPlayers = _players.Sessions.Count;
-            var converted = AllEntityQuery<SharedVampireComponent>()
-                .Count(e => !HasComp<VampireMatriarchComponent>(e.Item1));
+            var converted = AllEntityQuery<SharedVampireComponent>().Count(e => !HasComp<VampireMatriarchComponent>(e.Item1));
             var required = (int)Math.Floor(totalPlayers * 0.4f);
 
             string outcome;
             if (aliveMat > 0 && converted >= required)
                 outcome = "vamp-won";
-            else if (aliveMat <= 0)
+            else if (aliveMat == 0)
                 outcome = "vamp-lost";
             else
                 outcome = "vamp-stalemate";
