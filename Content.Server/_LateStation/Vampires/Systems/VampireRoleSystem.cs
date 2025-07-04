@@ -34,7 +34,7 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
             var total = EntityQuery<VampireComponent>().Count();
-            var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.2f));
+            var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.4f));
             if (total >= cap)
                 TriggerSilverAlert(uid);
         }
