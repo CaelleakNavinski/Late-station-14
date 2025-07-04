@@ -1,8 +1,9 @@
 using Content.Shared._LateStation.Vampires.Components;
+using Content.Shared.StatusIcon;
 using Content.Shared.StatusIcon.Components;    // GetStatusIconsEvent
-using Robust.Client.GameObjects;             // EntityUid extensions
+using Robust.Client.GameObjects;              // EntityUid extensions
 using Robust.Shared.GameObjects;
-using Robust.Shared.Prototypes;               // ProtoId<T>
+using Robust.Shared.Prototypes;              // ProtoId<T>
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
 
@@ -30,7 +31,7 @@ namespace Content.Client._LateStation.Vampires.Systems
             if (HasComp<SharedVampireMatriarchComponent>(uid))
                 return;
 
-            if (_prototype.TryIndex(comp.StatusIcon, out FactionIconPrototype icon))
+            if (_prototype.TryIndex<FactionIconPrototype>(comp.StatusIcon, out var icon))
                 args.StatusIcons.Add(icon);
         }
 
@@ -40,7 +41,7 @@ namespace Content.Client._LateStation.Vampires.Systems
             if (!EntityManager.TryGetComponent(uid, out SharedVampireComponent vampComp))
                 return;
 
-            if (_prototype.TryIndex(vampComp.StatusIcon, out FactionIconPrototype icon))
+            if (_prototype.TryIndex<FactionIconPrototype>(vampComp.StatusIcon, out var icon))
                 args.StatusIcons.Add(icon);
         }
     }
