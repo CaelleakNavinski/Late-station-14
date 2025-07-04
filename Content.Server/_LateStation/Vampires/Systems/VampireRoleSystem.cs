@@ -5,6 +5,7 @@ using Content.Server.Antag;
 using Content.Server.Chat.Systems;
 using Content.Server.Mind;                              // MindSystem
 using Content.Server.Roles;                             // RoleSystem, VampireRoleComponent
+using Content.Server._LateStation.Roles;
 using Content.Server.Station.Systems;
 using Content.Shared.Mind.Components;                   // MindComponent
 using Content.Shared.Actions;
@@ -58,7 +59,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                     _antag.SendBriefing(session,
                         Loc.GetString("vamp-role-greeting"),
                         Color.Red,
-                        shared.VampireStartSound);
+                        shared.VampStartSound);
                 }
             }
         }
