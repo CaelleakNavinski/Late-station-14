@@ -3,6 +3,8 @@ using System.Linq;
 using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
+using Content.Server.Mind;            // for MindSystem
+using Content.Shared.Mind.Components; // for MindComponent
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;
@@ -37,13 +39,39 @@ namespace Content.Server._LateStation.Vampires.Systems
             var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.4f));
             if (total >= cap)
                 TriggerSilverAlert(uid);
+
+                // Add the "Vampire" mind‐role
+            if (_mind.TryGetMind(uid, out var mindId, out _))
+            {
+                _role.MindAddRole(mindId, "MindRoleVampire");
+            }
+        }
+        
+
+        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
+        {
+            // Remove the "Vampire" mind‐role
+            if (_mind.TryGetMind(uid, out var mindId, out _))
+            {
+                _role.MindRemoveRole<VampireRoleComponent>(mindId);
+            }
         }
 
-        private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args) { }
+        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args) 
+        {
+            if (_mind.TryGetMind(uid, out var mindId, out _))
+            {
+                _role.MindAddRole(mindId, "MindRoleVampireMatriarch");
+            }
+        }
 
-        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args) { }
-
-        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args) { }
+        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args) 
+        {
+            if (_mind.TryGetMind(uid, out var mindId, out _))
+            {
+                _role.MindRemoveRole<VampireRoleComponent>(mindId);
+            }
+        }
 
         private void TriggerSilverAlert(EntityUid uid)
         {
