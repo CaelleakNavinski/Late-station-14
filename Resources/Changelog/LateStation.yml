@@ -520,3 +520,15 @@ Entries:
         meaning you won't randomly become bald.
   id: 66
   time: '2025-07-01T21:41:02.0000000+00:00'
+- author: DoggowithaKeyboard
+  changes:
+    - type: Add
+      message: Anomaly Locators can now be found in scientist lockers!
+  id: 67
+  time: '2025-07-03T19:52:50.0000000+00:00'
+- author: AryaRaiin
+  changes:
+    - type: Add
+      message: celebratory sandals
+  id: 68
+  time: '2025-07-03T22:29:35.0000000+00:00'
