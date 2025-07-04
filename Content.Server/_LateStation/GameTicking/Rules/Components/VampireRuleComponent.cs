@@ -10,5 +10,5 @@ namespace Content.Server._LateStation.GameTicking.Rules.Components;
 public sealed class VampireRuleComponent : Component
 {
     [DataField("matriarchCount")]
-    public int MatriarchCount { get; } = 1;
+    public int MatriarchCount { get; set; } = 1;
 }
