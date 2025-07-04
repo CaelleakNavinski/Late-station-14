@@ -1,14 +1,15 @@
 using Robust.Shared.GameStates;
-using Robust.Shared.Serialization;
-using Content.Server.GameTicking.Rules.Components;
+using Robust.Shared.Serialization;                      // For [DataDefinition]
+using Content.Server.GameTicking.Rules.Components;     // For GameRuleComponent
 
-namespace Content.Server._LateStation.GameTicking.Rules.Components;
-
-[RegisterComponent]
-[DataDefinition]
-[Access(typeof(VampireRuleSystem))]
-public sealed class VampireRuleComponent : Component
+namespace Content.Server._LateStation.GameTicking.Rules.Components
 {
-    [DataField("matriarchCount")]
-    public int MatriarchCount { get; set; } = 1;
+    [DataDefinition]
+    [RegisterComponent]
+    [Access(typeof(Content.Server._LateStation.GameTicking.Rules.VampireRuleSystem))]
+    public sealed partial class VampireRuleComponent : Component
+    {
+        [DataField("matriarchCount")]
+        public int MatriarchCount { get; set; } = 1;
+    }
 }
