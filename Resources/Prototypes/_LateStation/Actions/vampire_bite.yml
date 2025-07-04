@@ -11,14 +11,6 @@
         state: icon
       itemIconStyle: BigAction
       priority: -10
-      whitelist:
-        components:
-        - Body
-        - HumanoidAppearance
-      blacklist:
-        components:
-        - Vampire
-        - VampireMatriarch
       canTargetSelf: false
       interactOnMiss: false
       checkCanAccess: false
