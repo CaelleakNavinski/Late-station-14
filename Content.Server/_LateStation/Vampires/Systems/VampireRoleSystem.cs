@@ -1,21 +1,20 @@
 using System;
 using System.Linq;
-using Content.Server.Antag;
 using Content.Server.AlertLevel;
-using Content.Server.Station.Systems;
+using Content.Server.Antag;
 using Content.Server.Chat.Systems;
-using Content.Server.Mind;            // MindSystem
-using Content.Server.Roles;           // RoleSystem
-using Content.Server._LateStation.Roles; // VampireRoleComponent
-using Content.Shared.Mind.Components; // MindComponent
-using Content.Shared._LateStation.Vampires.Components;
-using Content.Server._LateStation.Vampires.Components;
-using Content.Shared.Actions;
-using Robust.Server.Player;
-using Robust.Shared.GameStates;
+using Content.Server.Mind;                              // MindSystem
+using Content.Server.Roles;                             // RoleSystem, VampireRoleComponent
+using Content.Server.Station.Systems;
+using Content.Shared.Mind.Components;                   // MindComponent
+using Content.Shared._LateStation.Vampires.Components;  // SharedVampireComponent
+using Content.Server._LateStation.Vampires.Components; // VampireComponent, VampireMatriarchComponent
 using Robust.Shared.IoC;
+using Robust.Shared.GameStates;
 using Robust.Shared.GameObjects;
-using Robust.Server.GameObjects;
+using Robust.Shared.Localization;
+using Robust.Shared.Player;
+using Robust.Shared.Maths;                              // Color
 
 namespace Content.Server._LateStation.Vampires.Systems
 {
@@ -27,8 +26,8 @@ namespace Content.Server._LateStation.Vampires.Systems
         [Dependency] private readonly AlertLevelSystem _alerts = default!;
         [Dependency] private readonly StationSystem _stations = default!;
         [Dependency] private readonly ChatSystem _chat = default!;
-        [Dependency] private readonly MindSystem _mind = default!;   // Added
-        [Dependency] private readonly RoleSystem _role = default!;   // Added
+        [Dependency] private readonly MindSystem _mind = default!;
+        [Dependency] private readonly RoleSystem _role = default!;
 
         public override void Initialize()
         {
@@ -42,7 +41,7 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void OnVampireInit(EntityUid uid, VampireComponent comp, ComponentInit args)
         {
             var total = EntityQuery<VampireComponent>().Count();
-            var cap   = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.4f));
+            var cap = Math.Max(3, (int)Math.Ceiling(_players.PlayerCount * 0.4f));
             if (total >= cap)
                 TriggerSilverAlert(uid);
 
@@ -58,7 +57,7 @@ namespace Content.Server._LateStation.Vampires.Systems
                     _antag.SendBriefing(session,
                         Loc.GetString("vamp-role-greeting"),
                         Color.Red,
-                        shared.VampStartSound);
+                        shared.VampireStartSound);
                 }
             }
         }
@@ -72,7 +71,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             }
         }
 
-        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args) 
+        private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args)
         {
             // Add the "Vampire Matriarch" mind‐role
             if (_mind.TryGetMind(uid, out var mindId, out _))
@@ -81,7 +80,7 @@ namespace Content.Server._LateStation.Vampires.Systems
             }
         }
 
-        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args) 
+        private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args)
         {
             // Remove the "Vampire Matriarch" mind‐role
             if (_mind.TryGetMind(uid, out var mindId, out _))
@@ -93,8 +92,11 @@ namespace Content.Server._LateStation.Vampires.Systems
         private void TriggerSilverAlert(EntityUid uid)
         {
             var station = _stations.GetOwningStation(uid);
-            if (station == null) return;
+            if (station == null)
+                return;
+
             _alerts.SetLevel(station.Value, "Silver", playSound: true, announce: true, force: true);
+
             const string msg =
                 "Scans have detected a significant escalation in vampiric activity aboard the station. " +
                 "Remain within your departments and report any suspicious behavior to Security or the Chaplain. " +
