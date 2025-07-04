@@ -12,7 +12,7 @@
   - type: VampireRole
 
 - type: entity
-  parent: MindRoleVampire
+  parent: MindRoleVampireMatriarch
   id: MindRoleVampire
   name: Vampire Role
   components:
