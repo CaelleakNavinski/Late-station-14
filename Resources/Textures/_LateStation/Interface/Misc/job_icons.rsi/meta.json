@@ -1,0 +1,17 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Vampire, VampireMatriarch sprited by Ceradon.",
+    "size": {
+        "x": 8,
+        "y": 8
+    },
+    "states": [
+        {
+            "name": "Vampire"
+        },
+        {
+            "name": "VampireMatriarch"
+        }
+    ]
+}
