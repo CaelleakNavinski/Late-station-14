@@ -1,8 +1,9 @@
 using System;
 using Content.Shared.Actions;
+using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared.Popups;
 using Content.Shared.StatusIcon.Components;
-using Content.Shared._LateStation.Vampires.Components;
+using Robust.Shared.GameStates;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
@@ -13,6 +14,7 @@ namespace Content.Shared._LateStation.Vampires.Systems
     /// <summary>
     /// Shared logic for vampire components: action hookup, state synchronization,
     /// and client visibility for vampire status icons via GetStatusIconsEvent.
+    /// Mirrors the pattern in SharedRevolutionarySystem.
     /// </summary>
     public sealed class SharedVampireSystem : EntitySystem
     {
@@ -23,7 +25,7 @@ namespace Content.Shared._LateStation.Vampires.Systems
         {
             base.Initialize();
 
-            // Hook up the bite action
+            // Hook up the bite action on init/shutdown
             SubscribeLocalEvent<SharedVampireComponent, ComponentInit>(OnVampireInit);
             SubscribeLocalEvent<SharedVampireComponent, ComponentShutdown>(OnVampireShutdown);
 
@@ -31,7 +33,7 @@ namespace Content.Shared._LateStation.Vampires.Systems
             SubscribeLocalEvent<SharedVampireComponent, ComponentGetStateAttemptEvent>(OnVampCompGetStateAttempt);
             SubscribeLocalEvent<SharedVampireMatriarchComponent, ComponentGetStateAttemptEvent>(OnVampCompGetStateAttempt);
 
-            // Ensure new clients get up-to-date vampire info
+            // Ensure late‑joining clients get up‑to‑date vampire info
             SubscribeLocalEvent<SharedVampireComponent, ComponentStartup>(DirtyVampComps);
             SubscribeLocalEvent<SharedVampireMatriarchComponent, ComponentStartup>(DirtyVampComps);
         }
@@ -71,11 +73,11 @@ namespace Content.Shared._LateStation.Vampires.Systems
         {
             // Force resend of all vampire and matriarch components
             var vampQuery = AllEntityQuery<SharedVampireComponent>();
-            while (vampQuery.MoveNext(out var id, out var _))
+            while (vampQuery.MoveNext(out var id, out _))
                 Dirty(id);
 
             var matQuery = AllEntityQuery<SharedVampireMatriarchComponent>();
-            while (matQuery.MoveNext(out var id2, out var _))
+            while (matQuery.MoveNext(out var id2, out _))
                 Dirty(id2);
         }
     }
