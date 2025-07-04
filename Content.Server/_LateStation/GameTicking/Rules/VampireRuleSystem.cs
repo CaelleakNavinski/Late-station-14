@@ -13,7 +13,7 @@ using Content.Shared.Mobs.Components;                           // MobStateCompo
 using Content.Shared._LateStation.Vampires.Components;
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
-using Robust.Shared.Player;
+using Robust.Server.Player;
 
 namespace Content.Server._LateStation.GameTicking.Rules
 {
