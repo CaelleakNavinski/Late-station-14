@@ -5,12 +5,15 @@ using Content.Server.Administration.Logs;
 using Content.Server.Antag;
 using Content.Server.Chat.Systems;
 using Content.Server.GameTicking.Rules;
-using Content.Server.GameTicking.Rules.Components;
+using Content.Server._LateStation.GameTicking.Rules.Components;
 using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Server.Shuttles.Systems;
 using Content.Server.Station.Systems;
+using Content.Shared.GameTicking.Components;
+using Content.Shared.GameTicking.Events;
+using Content.Shared.IdentityManagement;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared._LateStation.Vampires.Components;
@@ -29,10 +32,11 @@ namespace Content.Server._LateStation.GameTicking.Rules
     {
         [Dependency] private readonly IRobustRandom _random = default!;
         [Dependency] private readonly ChatSystem _chat = default!;
-        [Dependency] private readonly ISharedPlayerManager _players = default!;
+        [Dependency] private readonly RoleSystem _roles = default!;
         [Dependency] private readonly RoundEndSystem _roundEnd = default!;
         [Dependency] private readonly StationSystem _station = default!;
         [Dependency] private readonly EmergencyShuttleSystem _shuttle = default!;
+        [Dependency] private readonly ISharedPlayerManager _players = default!;
 
         public override void Initialize()
         {
@@ -113,21 +117,21 @@ namespace Content.Server._LateStation.GameTicking.Rules
 
             // List matriarch conversion counts
             args.AddLine(Loc.GetString("vamp-mat-count"));
-            var antags = _players.Sessions
+            var sessionData = _players.Sessions
                 .Select(s => s.AttachedEntity)
                 .Where(e => e != null)
                 .Cast<EntityUid>()
                 .Where(e => HasComp<VampireMatriarchComponent>(e));
 
-            foreach (var mat in antags)
+            foreach (var mat in sessionData)
             {
                 if (_roles.MindHasRole<VampireRoleComponent>(mat, out var role))
                 {
                     var count = role.Value.Comp2.ConvertedCount;
                     args.AddLine(Loc.GetString("vamp-mat-name-user",
                         ("name", Identity.Entity(mat)),
-                        ("username", role.Value.Comp2.Owner)),
-                        ("count", count));
+                        ("username", role.Value.Comp2.Owner),
+                        ("count", count)));
                 }
             }
         }
