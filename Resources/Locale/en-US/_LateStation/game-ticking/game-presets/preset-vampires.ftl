@@ -16,9 +16,13 @@ vamp-mat-briefing =
 roles-antag-vamp-name = Vampire
 roles-antag-vamp-objective = Your objective is to serve the Matriarch: spread your newly given blessing and protect the Matriarch at all costs.
 
-vamp-break-control = A surge of holy light erupts as the mercy stake pierces {$name}'s heart, erasing the vampiric curse!
+vamp-break-control = A surge of holy light erupts as the mercy stake pierces {$victim}'s heart, erasing the vampiric curse!
 
 vamp-bite-popup = A crimson spray bursts from {$victim} as fangs sink in!
+vamp-target-immune-aura-popup = Your bite was stopped by the holy aura coming from {$victim}!
+vamp-target-immune-other-vamp-popup = You cannot bite {$victim}; they're a Vampire!
+vamp-victim-immune-aura-popup = {$vamp}'s bite was stopped by the holy aura coming from you!
+vamp-target-immune-misc-popup = You cannot bite {$victim}!
 
 vamp-turn-msg-1 = Feed...
 vamp-turn-msg-2 = Their blood calls...
