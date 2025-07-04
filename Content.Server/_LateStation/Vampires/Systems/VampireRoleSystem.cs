@@ -3,12 +3,13 @@ using System.Linq;
 using Content.Server.AlertLevel;
 using Content.Server.Station.Systems;
 using Content.Server.Chat.Systems;
-using Content.Server.Mind;            // for MindSystem
-using Content.Shared.Mind.Components; // for MindComponent
+using Content.Server.Mind;            // MindSystem
+using Content.Server.Roles;           // RoleSystem
+using Content.Server._LateStation.Roles; // VampireRoleComponent
+using Content.Shared.Mind.Components; // MindComponent
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Server._LateStation.Vampires.Components;
 using Content.Shared.Actions;
-using Content.Shared.Damage;
 using Robust.Server.Player;
 using Robust.Shared.GameStates;
 using Robust.Shared.IoC;
@@ -23,6 +24,8 @@ namespace Content.Server._LateStation.Vampires.Systems
         [Dependency] private readonly AlertLevelSystem _alerts = default!;
         [Dependency] private readonly StationSystem _stations = default!;
         [Dependency] private readonly ChatSystem _chat = default!;
+        [Dependency] private readonly MindSystem _mind = default!;   // Added
+        [Dependency] private readonly RoleSystem _role = default!;   // Added
 
         public override void Initialize()
         {
@@ -40,13 +43,12 @@ namespace Content.Server._LateStation.Vampires.Systems
             if (total >= cap)
                 TriggerSilverAlert(uid);
 
-                // Add the "Vampire" mind‐role
+            // Add the "Vampire" mind‐role
             if (_mind.TryGetMind(uid, out var mindId, out _))
             {
                 _role.MindAddRole(mindId, "MindRoleVampire");
             }
         }
-        
 
         private void OnVampireShutdown(EntityUid uid, VampireComponent comp, ComponentShutdown args)
         {
@@ -59,6 +61,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnMatriarchInit(EntityUid uid, VampireMatriarchComponent comp, ComponentInit args) 
         {
+            // Add the "Vampire Matriarch" mind‐role
             if (_mind.TryGetMind(uid, out var mindId, out _))
             {
                 _role.MindAddRole(mindId, "MindRoleVampireMatriarch");
@@ -67,6 +70,7 @@ namespace Content.Server._LateStation.Vampires.Systems
 
         private void OnMatriarchShutdown(EntityUid uid, VampireMatriarchComponent comp, ComponentShutdown args) 
         {
+            // Remove the "Vampire Matriarch" mind‐role
             if (_mind.TryGetMind(uid, out var mindId, out _))
             {
                 _role.MindRemoveRole<VampireRoleComponent>(mindId);
