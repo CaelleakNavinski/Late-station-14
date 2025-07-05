@@ -29,15 +29,15 @@ namespace Content.Client._LateStation.Vampires.Systems
             if (HasComp<SharedVampireMatriarchComponent>(uid))
                 return;
 
-            if (_prototype.TryIndex(comp.StatusIcon, out FactionIconPrototype icon) && icon != null)
-                args.StatusIcons.Add(icon);
+            if (_prototype.TryIndex(comp.StatusIcon, out var iconPrototype))
+                args.StatusIcons.Add(iconPrototype);
         }
 
         private void OnMatriarchIcon(EntityUid uid, SharedVampireMatriarchComponent matComp, ref GetStatusIconsEvent args)
         {
 
-            if (_prototype.TryIndex(matComp.StatusIcon, out FactionIconPrototype icon) && icon != null)
-                args.StatusIcons.Add(icon);
+            if (_prototype.TryIndex(matComp.StatusIcon, out var iconPrototype))
+                args.StatusIcons.Add(iconPrototype);
         }
     }
 }
