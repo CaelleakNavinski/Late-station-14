@@ -1,9 +1,7 @@
-// File: Content.Shared/_LateStation/Vampires/Systems/SharedVampireSystem.cs
-
 using System;
 using Content.Shared.Actions;
+using Content.Shared.Antag;                                // for ShowAntagIconsComponent
 using Content.Shared._LateStation.Vampires.Components;
-using Content.Shared.Antag;
 using Content.Shared.Popups;
 using Robust.Shared.GameStates;
 using Robust.Shared.GameObjects;
@@ -37,6 +35,7 @@ namespace Content.Shared._LateStation.Vampires.Systems
             // Ensure late‑joining clients get up‑to‑date vampire info
             SubscribeLocalEvent<SharedVampireComponent, ComponentStartup>(DirtyVampComps);
             SubscribeLocalEvent<SharedVampireMatriarchComponent, ComponentStartup>(DirtyVampComps);
+            SubscribeLocalEvent<ShowAntagIconsComponent, ComponentStartup>(DirtyVampComps);
         }
 
         private void OnVampireInit(EntityUid uid, SharedVampireComponent comp, ComponentInit args)
@@ -75,16 +74,14 @@ namespace Content.Shared._LateStation.Vampires.Systems
             // Force resend of all vampire components
             var vampQuery = AllEntityQuery<SharedVampireComponent>();
             while (vampQuery.MoveNext(out var id, out var vampComp))
-            {
                 Dirty(id, vampComp);
-            }
 
             // Force resend of all matriarch components
             var matQuery = AllEntityQuery<SharedVampireMatriarchComponent>();
             while (matQuery.MoveNext(out var id2, out var matComp))
-            {
                 Dirty(id2, matComp);
-            }
+
+            // And ensure ShowAntagIconsComponent also triggers a refresh
         }
     }
 }
