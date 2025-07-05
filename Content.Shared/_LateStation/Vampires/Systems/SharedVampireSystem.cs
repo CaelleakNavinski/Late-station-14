@@ -1,6 +1,6 @@
 using System;
 using Content.Shared.Actions;
-using Content.Shared.Antag;                                // for ShowAntagIconsComponent
+using Content.Shared.Antag;                        // for ShowAntagIconsComponent
 using Content.Shared._LateStation.Vampires.Components;
 using Content.Shared.Popups;
 using Robust.Shared.GameStates;
@@ -15,7 +15,7 @@ namespace Content.Shared._LateStation.Vampires.Systems
     /// Shared logic for vampire components: action hookup, state synchronization,
     /// and client visibility for vampire status icons via GetStatusIconsEvent.
     /// </summary>
-    public sealed class SharedVampireSystem : EntitySystem
+    public abstract class SharedVampireSystem : EntitySystem
     {
         [Dependency] private readonly SharedActionsSystem _actions = default!;
         [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
@@ -35,7 +35,6 @@ namespace Content.Shared._LateStation.Vampires.Systems
             // Ensure late‑joining clients get up‑to‑date vampire info
             SubscribeLocalEvent<SharedVampireComponent, ComponentStartup>(DirtyVampComps);
             SubscribeLocalEvent<SharedVampireMatriarchComponent, ComponentStartup>(DirtyVampComps);
-            SubscribeLocalEvent<ShowAntagIconsComponent, ComponentStartup>(DirtyVampComps);
         }
 
         private void OnVampireInit(EntityUid uid, SharedVampireComponent comp, ComponentInit args)
@@ -65,23 +64,19 @@ namespace Content.Shared._LateStation.Vampires.Systems
             if (HasComp<SharedVampireComponent>(ent) || HasComp<SharedVampireMatriarchComponent>(ent))
                 return true;
 
-            // Other players see vampire icons only if allowed
+            // Other players see vampire icons only if they have the ShowAntagIconsComponent
             return HasComp<ShowAntagIconsComponent>(ent);
         }
 
         private void DirtyVampComps<T>(EntityUid uid, T _, ComponentStartup args) where T : IComponent
         {
-            // Force resend of all vampire components
             var vampQuery = AllEntityQuery<SharedVampireComponent>();
             while (vampQuery.MoveNext(out var id, out var vampComp))
                 Dirty(id, vampComp);
 
-            // Force resend of all matriarch components
             var matQuery = AllEntityQuery<SharedVampireMatriarchComponent>();
             while (matQuery.MoveNext(out var id2, out var matComp))
                 Dirty(id2, matComp);
-
-            // And ensure ShowAntagIconsComponent also triggers a refresh
         }
     }
 }
