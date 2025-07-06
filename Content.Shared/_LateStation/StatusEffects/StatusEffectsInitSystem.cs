@@ -1,15 +1,12 @@
-// File: Content.Shared/_LateStation/StatusEffects/StatusEffectsInitSystem.cs
-
 using System.Collections.Generic;
-using Content.Shared.StatusEffect;             // StatusEffectsComponent, StatusEffectEntry
+using Content.Shared.StatusEffect;    // StatusEffectsComponent, StatusEffectState
 using Robust.Shared.GameObjects;
-using Robust.Shared.IoC;
 
 namespace Content.Shared._LateStation.StatusEffects
 {
     /// <summary>
-    /// Ensures that every StatusEffectsComponent has a non-null Effects list
-    /// so that StatusEffectsSystem.OnGetState never sees a null collection.
+    /// Ensures that StatusEffectsComponent.ActiveEffects and AllowedEffects
+    /// are never null, preventing null‐collection crashes in OnGetState.
     /// </summary>
     public sealed class StatusEffectsInitSystem : EntitySystem
     {
@@ -21,8 +18,9 @@ namespace Content.Shared._LateStation.StatusEffects
 
         private void OnInit(EntityUid uid, StatusEffectsComponent comp, ComponentInit args)
         {
-            if (comp.Effects == null)
-                comp.Effects = new List<StatusEffectEntry>();
+            // Initialize the dictionaries/lists if they came in null
+            comp.ActiveEffects  ??= new Dictionary<string, StatusEffectState>();
+            comp.AllowedEffects ??= new List<string>();
         }
     }
 }
