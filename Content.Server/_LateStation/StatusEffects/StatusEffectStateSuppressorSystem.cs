@@ -5,21 +5,23 @@ using Robust.Shared.IoC;
 namespace Content.Server._LateStation.StatusEffects
 {
     /// <summary>
-    /// Prevents crashes caused by uninitialized AllowedEffects/ActiveEffects.
-    /// Ensures that any StatusEffectsComponent has non-null lists.
+    /// Prevents crashes in StatusEffectsSystem.OnGetState by cancelling the state request
+    /// if the component was constructed without initializing its list fields.
     /// </summary>
     public sealed class StatusEffectStateSuppressorSystem : EntitySystem
     {
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<StatusEffectsComponent, ComponentInit>(OnInit);
+            SubscribeLocalEvent<StatusEffectsComponent, ComponentGetStateAttemptEvent>(OnGetStateAttempt);
         }
 
-        private void OnInit(EntityUid uid, StatusEffectsComponent comp, ComponentInit args)
+        private void OnGetStateAttempt(EntityUid uid, StatusEffectsComponent comp, ref ComponentGetStateAttemptEvent args)
         {
-            comp.AllowedEffects ??= new();
-            comp.ActiveEffects ??= new();
+            if (comp.AllowedEffects == null || comp.ActiveEffects == null)
+            {
+                args.Cancelled = true;
+            }
         }
     }
 }
