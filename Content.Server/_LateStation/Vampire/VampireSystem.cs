@@ -147,3 +147,53 @@ public sealed class VampireSystem : EntitySystem
             return;
         }
     }
+
+private void CompleteTurning(EntityUid uid, VampireTurningComponent comp)
+{
+    RemCompDeferred<VampireTurningComponent>(uid);
+
+    var vampire = EnsureComp<VampireComponent>(uid);
+    vampire.Matriarch = ResolveMatriarch(comp.Source);
+
+    if (!vampire.CanConvert && _random.Prob(0.10f))
+    {
+        vampire.CanConvert = true;
+        EnsureBiteAction((uid, vampire));
+    }
+
+    if (!_mind.TryGetMind(uid, out var mindId, out _))
+        return;
+
+    if (_role.MindHasRole<VampireRoleComponent>(mindId, out _))
+        return;
+
+    if (_role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
+        return;
+
+    _role.MindAddRole(mindId, MindRoleVampire);
+}
+
+private EntityUid? ResolveMatriarch(EntityUid? source)
+{
+    if (source == null)
+        return null;
+
+    if (TryComp<VampireComponent>(source.Value, out var sourceVamp))
+    {
+        if (sourceVamp.Matriarch != null)
+            return sourceVamp.Matriarch;
+
+        if (_mind.TryGetMind(source.Value, out var mindId, out _) &&
+            _role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
+        {
+            return source.Value;
+        }
+    }
+    else if (_mind.TryGetMind(source.Value, out var mindId, out _) &&
+             _role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
+    {
+        return source.Value;
+    }
+
+    return null;
+}
