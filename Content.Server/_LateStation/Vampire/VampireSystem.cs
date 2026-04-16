@@ -1,5 +1,5 @@
-using Content.Server.Antag;
 using Content.Server.Actions;
+using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Shared.DoAfter;
 using Content.Shared.Humanoid;
@@ -7,6 +7,7 @@ using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
+using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire;
 using Content.Shared._LateStation.Vampire.Components;
 using Robust.Shared.Random;
@@ -26,14 +27,14 @@ public sealed class VampireSystem : EntitySystem
     private const string BiteActionId = "ActionVampireBite";
     private const string MindRoleVampire = "MindRoleVampire";
 
-    [Dependency] private readonly AntagSelectionSystem _antag = default!;
     [Dependency] private readonly ActionsSystem _actions = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly RoleSystem _role = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
-    [Dependency] private readonly RoleSystem _role = default!;
 
     public override void Initialize()
     {
@@ -87,7 +88,8 @@ public sealed class VampireSystem : EntitySystem
         if (!CanStartTurning(ent.Owner, args.Target))
             return;
 
-        var doAfter = new DoAfterArgs(EntityManager,
+        var doAfter = new DoAfterArgs(
+            EntityManager,
             args.Performer,
             TimeSpan.FromSeconds(1),
             new VampireBiteDoAfterEvent(),
@@ -121,7 +123,7 @@ public sealed class VampireSystem : EntitySystem
         turning.FinalWarningStage = 0;
         turning.NextTick = _timing.CurTime + TimeSpan.FromSeconds(1);
 
-        _popup.PopupEntity(Loc.GetString("vamp-bite-popup", ("victim", target)), target);
+        _popup.PopupEntity(Loc.GetString("vamp-bite-popup", ("victim", target)), target, target);
 
         args.Handled = true;
     }
@@ -136,13 +138,19 @@ public sealed class VampireSystem : EntitySystem
 
         if (HasComp<VampireComponent>(target))
         {
-            _popup.PopupEntity(Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", target)), vampire, vampire);
+            _popup.PopupEntity(
+                Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", target)),
+                vampire,
+                vampire);
             return false;
         }
 
         if (HasComp<VampireTurningComponent>(target))
         {
-            _popup.PopupEntity(Loc.GetString("vamp-target-immune-misc-popup", ("victim", target)), vampire, vampire);
+            _popup.PopupEntity(
+                Loc.GetString("vamp-target-immune-misc-popup", ("victim", target)),
+                vampire,
+                vampire);
             return false;
         }
 
@@ -202,12 +210,14 @@ public sealed class VampireSystem : EntitySystem
             EnsureBiteAction((uid, vampire));
         }
 
-        if (_role.MindHasRole<VampireRoleComponent>(uid))
+        if (!_mind.TryGetMind(uid, out var mindId, out _))
             return;
 
-        if (_role.MindHasRole<VampireMatriarchRoleComponent>(uid))
+        if (_role.MindHasRole<VampireRoleComponent>(mindId))
             return;
 
-        _role.MindAddRole(uid, MindRoleVampire);
+        if (_role.MindHasRole<VampireMatriarchRoleComponent>(mindId))
+            return;
+
+        _role.MindAddRole(mindId, MindRoleVampire);
     }
-}
