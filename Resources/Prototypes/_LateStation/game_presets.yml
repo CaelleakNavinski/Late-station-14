@@ -10,3 +10,21 @@
   - MeteorSwarmScheduler
   - SpaceTrafficControlEventScheduler
   - BasicRoundstartVariation
+
+- type: gamePreset
+  id: Vampires
+  alias:
+  - vampires
+  - vampire
+  - vamp
+  name: vamp-title
+  showInVote: true
+  description: vamp-description
+  rules:
+  - DummyNonAntagChance
+  - Vampire
+  - SubGamemodesRuleNoWizard
+  - BasicStationEventScheduler
+  - MeteorSwarmScheduler
+  - SpaceTrafficControlEventScheduler
+  - BasicRoundstartVariation
