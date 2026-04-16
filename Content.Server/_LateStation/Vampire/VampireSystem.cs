@@ -188,10 +188,10 @@ public sealed class VampireSystem : EntitySystem
         if (!CanFeedTarget(ent.Owner, target))
             return;
 
-        ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + 5f);
         ent.Comp.LastFeedTime = _timing.CurTime;
         ent.Comp.NextBloodDecayTick = _timing.CurTime + ent.Comp.BloodDecayDelay;
-
+        Dirty(ent.Owner, ent.Comp);
+        
         if (TryComp<HungerComponent>(ent.Owner, out var hunger))
             _hunger.ModifyHunger(ent.Owner, 15f, hunger);
 
