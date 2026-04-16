@@ -6,6 +6,8 @@ using Content.Shared.DoAfter;
 using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.Nutrition.Components;
+using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire;
@@ -21,6 +23,7 @@ namespace Content.Server._LateStation.Vampire;
 /// - Feed action
 /// - timed turning state
 /// - completion into Vampire / Exarch-capable vampire
+/// - blood upkeep through feeding
 /// </summary>
 public sealed class VampireSystem : EntitySystem
 {
@@ -29,6 +32,7 @@ public sealed class VampireSystem : EntitySystem
     private const string MindRoleVampire = "MindRoleVampire";
 
     [Dependency] private readonly ActionsSystem _actions = default!;
+    [Dependency] private readonly HungerSystem _hunger = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly MindSystem _mind = default!;
@@ -36,6 +40,7 @@ public sealed class VampireSystem : EntitySystem
     [Dependency] private readonly RoleSystem _role = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
+    [Dependency] private readonly ThirstSystem _thirst = default!;
 
     public override void Initialize()
     {
@@ -51,14 +56,17 @@ public sealed class VampireSystem : EntitySystem
     private void OnVampireMapInit(Entity<VampireComponent> ent, ref MapInitEvent args)
     {
         EnsureActions(ent);
+
+        ent.Comp.LastFeedTime = _timing.CurTime;
+        ent.Comp.NextBloodDecayTick = _timing.CurTime + ent.Comp.BloodDecayDelay;
     }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
 
-        var query = EntityQueryEnumerator<VampireTurningComponent>();
-        while (query.MoveNext(out var uid, out var turning))
+        var turningQuery = EntityQueryEnumerator<VampireTurningComponent>();
+        while (turningQuery.MoveNext(out var uid, out var turning))
         {
             if (turning.NextTick > _timing.CurTime)
                 continue;
@@ -72,6 +80,12 @@ public sealed class VampireSystem : EntitySystem
                 continue;
 
             CompleteTurning(uid, turning);
+        }
+
+        var vampireQuery = EntityQueryEnumerator<VampireComponent>();
+        while (vampireQuery.MoveNext(out var uid, out var vampire))
+        {
+            UpdateBloodDecay(uid, vampire);
         }
     }
 
@@ -175,6 +189,15 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + 5f);
+        ent.Comp.LastFeedTime = _timing.CurTime;
+        ent.Comp.NextBloodDecayTick = _timing.CurTime + ent.Comp.BloodDecayDelay;
+
+        if (TryComp<HungerComponent>(ent.Owner, out var hunger))
+            _hunger.ModifyHunger(ent.Owner, 15f, hunger);
+
+        if (TryComp<ThirstComponent>(ent.Owner, out var thirst))
+            _thirst.ModifyThirst(ent.Owner, thirst, 15f);
+
         Dirty(ent.Owner, ent.Comp);
 
         _popup.PopupEntity(Loc.GetString("vamp-feed-success"), ent.Owner, ent.Owner);
@@ -182,6 +205,20 @@ public sealed class VampireSystem : EntitySystem
         StartFeedDoAfter(ent.Owner, target);
 
         args.Handled = true;
+    }
+
+    private void UpdateBloodDecay(EntityUid uid, VampireComponent comp)
+    {
+        if (_timing.CurTime < comp.LastFeedTime + comp.BloodDecayDelay)
+            return;
+
+        if (_timing.CurTime < comp.NextBloodDecayTick)
+            return;
+
+        comp.NextBloodDecayTick = _timing.CurTime + comp.BloodDecayInterval;
+        comp.Blood = MathF.Max(0f, comp.Blood - 1f);
+
+        Dirty(uid, comp);
     }
 
     private bool CanFeedTarget(EntityUid vampire, EntityUid target)
@@ -277,6 +314,8 @@ public sealed class VampireSystem : EntitySystem
 
         var vampire = EnsureComp<VampireComponent>(uid);
         vampire.Matriarch = ResolveMatriarch(comp.Source);
+        vampire.LastFeedTime = _timing.CurTime;
+        vampire.NextBloodDecayTick = _timing.CurTime + vampire.BloodDecayDelay;
 
         if (!vampire.CanConvert && _random.Prob(0.10f))
         {
@@ -322,4 +361,3 @@ public sealed class VampireSystem : EntitySystem
 
         return null;
     }
-}
