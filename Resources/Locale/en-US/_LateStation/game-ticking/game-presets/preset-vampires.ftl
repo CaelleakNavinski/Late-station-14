@@ -55,6 +55,8 @@ vamp-not-enough-ready-players = Not enough players readied up for the game. Ther
 vamp-no-one-ready = No players readied up! Cannot begin the Vampire invasion.
 vamp-no-matriarch = There was no Vampire Matriarch to be selected. Cannot start the Vampire invasion.
 
+vamp-bite-marks-examine = They have two puncture wounds on their neck!
+
 ## Outcomes
 vamp-won = The vampires have consumed or converted enough crew members. Night claims all.
 vamp-lost = The Matriarch has fallen and the remaining brood were destroyed in the dawn’s fire.
