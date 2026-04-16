@@ -4,7 +4,6 @@ using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Shared.GameTicking.Components;
-using Content.Shared.Roles.Components;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire.Components;
 
