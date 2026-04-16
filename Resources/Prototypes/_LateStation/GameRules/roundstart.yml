@@ -20,3 +20,22 @@
         tableId: CalmPestEventsTable
       - !type:NestedSelector
         tableId: SpicyPestEventsTable
+
+- type: entity
+  id: Vampire
+  parent: BaseGameRule
+  components:
+  - type: GameRule
+  - type: VampireRule
+  - type: AntagSelection
+    selectionTime: IntraPlayerSpawn
+    definitions:
+    - prefRoles: [ VampMatriarch ]
+      max: 1
+      briefing:
+        text: vamp-mat-role-greeting
+        color: Red
+      mindRoles:
+      - MindRoleVampireMatriarch
+  - type: DynamicRuleCost
+    cost: 200
