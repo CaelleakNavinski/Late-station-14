@@ -19,6 +19,5 @@ public sealed partial class VampireComponent : Component
     /// <summary>
     /// Runtime action entity for the Converting Bite action.
     /// </summary>
-    [DataField]
     public EntityUid? BiteAction;
 }
