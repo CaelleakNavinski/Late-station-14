@@ -175,7 +175,7 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + 5f);
-        Dirty(ent);
+        Dirty(ent.Owner, ent.Comp);
 
         _popup.PopupEntity(Loc.GetString("vamp-feed-success"), ent.Owner, ent.Owner);
 
