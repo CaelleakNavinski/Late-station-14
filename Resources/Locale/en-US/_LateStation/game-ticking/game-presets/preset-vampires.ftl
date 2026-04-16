@@ -23,6 +23,7 @@ vamp-target-immune-aura-popup = Your bite was stopped by the holy aura coming fr
 vamp-target-immune-other-vamp-popup = You cannot bite {$victim}; they're a Vampire!
 vamp-victim-immune-aura-popup = {$vamp}'s bite was stopped by the holy aura coming from you!
 vamp-target-immune-misc-popup = You cannot bite {$victim}!
+vamp-feed-success = You drink deeply. It tastes euphoric.
 
 vamp-turn-msg-1 = Feed...
 vamp-turn-msg-2 = Their blood calls...
