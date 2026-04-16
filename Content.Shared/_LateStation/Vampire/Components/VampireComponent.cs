@@ -1,4 +1,6 @@
+using System;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared._LateStation.Vampire.Components;
 
@@ -9,40 +11,36 @@ namespace Content.Shared._LateStation.Vampire.Components;
 [RegisterComponent]
 public sealed partial class VampireComponent : Component
 {
-    /// <summary>
-    /// True for the Matriarch and Exarch-capable vampires.
-    /// Ordinary vampires remain false.
-    /// </summary>
     [DataField]
     public bool CanConvert = false;
 
-    /// <summary>
-    /// The body entity of the Matriarch this vampire belongs to.
-    /// For the Matriarch herself, this should be their own body entity.
-    /// </summary>
     [DataField]
     public EntityUid? Matriarch;
 
-    /// <summary>
-    /// Current stored blood resource.
-    /// Meter range is 0..100.
-    /// </summary>
     [DataField]
     public float Blood = 0f;
 
-    /// <summary>
-    /// Maximum blood resource.
-    /// </summary>
     [DataField]
     public float MaxBlood = 100f;
 
     /// <summary>
-    /// Runtime action entity for the Converting Bite action.
+    /// After 60 seconds without a successful feed, blood begins decaying.
     /// </summary>
-    public EntityUid? BiteAction;
+    [DataField]
+    public TimeSpan BloodDecayDelay = TimeSpan.FromSeconds(60);
 
     /// <summary>
-    /// Runtime action entity for the Feed action.
+    /// While decaying, lose 1 blood every 4 seconds.
     /// </summary>
+    [DataField]
+    public TimeSpan BloodDecayInterval = TimeSpan.FromSeconds(4);
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    public TimeSpan LastFeedTime = TimeSpan.Zero;
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    public TimeSpan NextBloodDecayTick = TimeSpan.Zero;
+
+    public EntityUid? BiteAction;
     public EntityUid? FeedAction;
 }
