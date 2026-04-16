@@ -121,6 +121,7 @@ public sealed class VampireSystem : EntitySystem
         turning.Remaining = TimeSpan.FromMinutes(2);
         turning.FinalWarningStage = 0;
         turning.NextTick = _timing.CurTime + TimeSpan.FromSeconds(1);
+        turning.HasBiteMarks = true;
 
         _popup.PopupEntity(Loc.GetString("vamp-bite-popup", ("victim", target)), target, target);
 
@@ -220,6 +221,8 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         _role.MindAddRole(mindId, MindRoleVampire);
+
+        _popup.PopupEntity(Loc.GetString("vamp-role-greeting"), uid, uid);
     }
 
     private EntityUid? ResolveMatriarch(EntityUid? source)
@@ -246,166 +249,4 @@ public sealed class VampireSystem : EntitySystem
 
         return null;
     }
-}    }
-
-    private void OnBiteAction(Entity<VampireComponent> ent, ref VampireBiteActionEvent args)
-    {
-        if (args.Handled || !ent.Comp.CanConvert)
-            return;
-
-        if (!CanStartTurning(ent.Owner, args.Target))
-            return;
-
-        var doAfter = new DoAfterArgs(
-            EntityManager,
-            args.Performer,
-            TimeSpan.FromSeconds(1),
-            new VampireBiteDoAfterEvent(),
-            target: args.Target,
-            used: ent.Owner,
-            eventTarget: ent.Owner)
-        {
-            BreakOnDamage = true,
-            BreakOnMove = true,
-            MovementThreshold = 0.5f,
-            CancelDuplicate = false
-        };
-
-        _doAfter.TryStartDoAfter(doAfter);
-        args.Handled = true;
-    }
-
-    private void OnBiteDoAfter(Entity<VampireComponent> ent, ref VampireBiteDoAfterEvent args)
-    {
-        if (args.Cancelled || args.Handled || args.Target == null)
-            return;
-
-        var target = args.Target.Value;
-
-        if (!CanStartTurning(ent.Owner, target))
-            return;
-
-        var turning = EnsureComp<VampireTurningComponent>(target);
-        turning.Source = ent.Owner;
-        turning.Remaining = TimeSpan.FromMinutes(2);
-        turning.FinalWarningStage = 0;
-        turning.NextTick = _timing.CurTime + TimeSpan.FromSeconds(1);
-
-        _popup.PopupEntity(Loc.GetString("vamp-bite-popup", ("victim", target)), target, target);
-
-        args.Handled = true;
-    }
-
-    private bool CanStartTurning(EntityUid vampire, EntityUid target)
-    {
-        if (vampire == target)
-            return false;
-
-        if (!TryComp<HumanoidAppearanceComponent>(target, out _))
-            return false;
-
-        if (HasComp<VampireComponent>(target))
-        {
-            _popup.PopupEntity(
-                Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", target)),
-                vampire,
-                vampire);
-            return false;
-        }
-
-        if (HasComp<VampireTurningComponent>(target))
-        {
-            _popup.PopupEntity(
-                Loc.GetString("vamp-target-immune-misc-popup", ("victim", target)),
-                vampire,
-                vampire);
-            return false;
-        }
-
-        if (!TryComp<MobStateComponent>(target, out var mobState))
-            return false;
-
-        return _mobState.IsAlive(target, mobState) || _mobState.IsCritical(target, mobState);
-    }
-
-    private void HandleTurningMessages(EntityUid uid, VampireTurningComponent comp)
-    {
-        var remaining = (int)Math.Ceiling(comp.Remaining.TotalSeconds);
-
-        if (remaining <= 0)
-        {
-            _popup.PopupEntity(Loc.GetString("vamp-final-msg-6"), uid, uid);
-            return;
-        }
-
-        if (remaining <= 10)
-        {
-            var stage = remaining switch
-            {
-                10 => 1,
-                8 => 2,
-                6 => 3,
-                4 => 4,
-                2 => 5,
-                _ => 0
-            };
-
-            if (stage > comp.FinalWarningStage)
-            {
-                comp.FinalWarningStage = stage;
-                _popup.PopupEntity(Loc.GetString($"vamp-final-msg-{stage}"), uid, uid);
-            }
-
-            return;
-        }
-    }
-
-private void CompleteTurning(EntityUid uid, VampireTurningComponent comp)
-{
-    RemCompDeferred<VampireTurningComponent>(uid);
-
-    var vampire = EnsureComp<VampireComponent>(uid);
-    vampire.Matriarch = ResolveMatriarch(comp.Source);
-
-    if (!vampire.CanConvert && _random.Prob(0.10f))
-    {
-        vampire.CanConvert = true;
-        EnsureBiteAction((uid, vampire));
-    }
-
-    if (!_mind.TryGetMind(uid, out var mindId, out _))
-        return;
-
-    if (_role.MindHasRole<VampireRoleComponent>(mindId, out _))
-        return;
-
-    if (_role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
-        return;
-
-    _role.MindAddRole(mindId, MindRoleVampire);
-}
-
-private EntityUid? ResolveMatriarch(EntityUid? source)
-{
-    if (source == null)
-        return null;
-
-    if (TryComp<VampireComponent>(source.Value, out var sourceVamp))
-    {
-        if (sourceVamp.Matriarch != null)
-            return sourceVamp.Matriarch;
-
-        if (_mind.TryGetMind(source.Value, out var mindId, out _) &&
-            _role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
-        {
-            return source.Value;
-        }
-    }
-    else if (_mind.TryGetMind(source.Value, out var mindId, out _) &&
-             _role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
-    {
-        return source.Value;
-    }
-
-    return null;
 }
