@@ -3,7 +3,6 @@ using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Shared.DoAfter;
 using Content.Shared.Humanoid;
-using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
@@ -162,7 +161,7 @@ public sealed class VampireSystem : EntitySystem
 
     private void HandleTurningMessages(EntityUid uid, VampireTurningComponent comp)
     {
-        var remaining = (int) Math.Ceiling(comp.Remaining.TotalSeconds);
+        var remaining = (int)Math.Ceiling(comp.Remaining.TotalSeconds);
 
         if (remaining <= 0)
         {
@@ -190,34 +189,3 @@ public sealed class VampireSystem : EntitySystem
 
             return;
         }
-
-        if (remaining <= 45 && remaining % 3 == 0 && _random.Prob(1f / 3f))
-        {
-            var msg = _random.Next(1, 8);
-            _popup.PopupEntity(Loc.GetString($"vamp-turn-msg-{msg}"), uid, uid);
-        }
-    }
-
-    private void CompleteTurning(EntityUid uid, VampireTurningComponent comp)
-    {
-        RemCompDeferred<VampireTurningComponent>(uid);
-
-        var vampire = EnsureComp<VampireComponent>(uid);
-
-        if (!vampire.CanConvert && _random.Prob(0.10f))
-        {
-            vampire.CanConvert = true;
-            EnsureBiteAction((uid, vampire));
-        }
-
-        if (!_mind.TryGetMind(uid, out var mindId, out _))
-            return;
-
-        if (_role.MindHasRole<VampireRoleComponent>(mindId))
-            return;
-
-        if (_role.MindHasRole<VampireMatriarchRoleComponent>(mindId))
-            return;
-
-        _role.MindAddRole(mindId, MindRoleVampire);
-    }
