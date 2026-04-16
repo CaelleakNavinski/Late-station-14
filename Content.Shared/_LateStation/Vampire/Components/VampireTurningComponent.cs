@@ -1,3 +1,4 @@
+using System;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
@@ -36,4 +37,11 @@ public sealed partial class VampireTurningComponent : Component
     /// </summary>
     [DataField]
     public int FinalWarningStage = 0;
+
+    /// <summary>
+    /// Turning victims keep visible bite-mark state until cured or converted.
+    /// Fully converted vampires lose this state when the turning component is removed.
+    /// </summary>
+    [DataField]
+    public bool HasBiteMarks = false;
 }
