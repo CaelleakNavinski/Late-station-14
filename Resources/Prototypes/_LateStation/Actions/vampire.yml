@@ -9,3 +9,15 @@
   - type: TargetAction
   - type: EntityTargetAction
     event: !type:VampireBiteActionEvent
+
+- type: entity
+  id: ActionVampireFeed
+  parent: BaseAction
+  name: Feed
+  description: Drink deeply from a nearby victim to sustain yourself and build blood power.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+  - type: TargetAction
+  - type: EntityTargetAction
+    event: !type:VampireFeedActionEvent
