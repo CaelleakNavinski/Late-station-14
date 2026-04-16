@@ -114,3 +114,11 @@
       emergencyLightColor: "#bf002c"
       forceEnableEmergencyLights: true
       shuttleTime: 600
+# LateStation additions
+    silver:
+      announcement: alert-level-silver-announcement
+      sound: /Audio/Misc/notice1.ogg
+      color: "bdbcc4"
+      emergencyLightColor: "#bdbcc4"
+      forceEnableEmergencyLights: true
+      shuttleTime: 600
