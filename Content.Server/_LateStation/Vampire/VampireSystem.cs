@@ -1,3 +1,4 @@
+using System;
 using Content.Server.Actions;
 using Content.Server.Mind;
 using Content.Server.Roles;
@@ -17,13 +18,14 @@ namespace Content.Server._LateStation.Vampire;
 /// <summary>
 /// First implementation slice for vampires:
 /// - Converting Bite action
-/// - 1 second bite DoAfter
+/// - Feed action
 /// - timed turning state
 /// - completion into Vampire / Exarch-capable vampire
 /// </summary>
 public sealed class VampireSystem : EntitySystem
 {
     private const string BiteActionId = "ActionVampireBite";
+    private const string FeedActionId = "ActionVampireFeed";
     private const string MindRoleVampire = "MindRoleVampire";
 
     [Dependency] private readonly ActionsSystem _actions = default!;
@@ -42,11 +44,13 @@ public sealed class VampireSystem : EntitySystem
         SubscribeLocalEvent<VampireComponent, MapInitEvent>(OnVampireMapInit);
         SubscribeLocalEvent<VampireComponent, VampireBiteActionEvent>(OnBiteAction);
         SubscribeLocalEvent<VampireComponent, VampireBiteDoAfterEvent>(OnBiteDoAfter);
+        SubscribeLocalEvent<VampireComponent, VampireFeedActionEvent>(OnFeedAction);
+        SubscribeLocalEvent<VampireComponent, VampireFeedDoAfterEvent>(OnFeedDoAfter);
     }
 
     private void OnVampireMapInit(Entity<VampireComponent> ent, ref MapInitEvent args)
     {
-        EnsureBiteAction(ent);
+        EnsureActions(ent);
     }
 
     public override void Update(float frameTime)
@@ -71,12 +75,12 @@ public sealed class VampireSystem : EntitySystem
         }
     }
 
-    private void EnsureBiteAction(Entity<VampireComponent> ent)
+    private void EnsureActions(Entity<VampireComponent> ent)
     {
-        if (!ent.Comp.CanConvert)
-            return;
+        _actions.AddAction(ent.Owner, ref ent.Comp.FeedAction, FeedActionId);
 
-        _actions.AddAction(ent.Owner, ref ent.Comp.BiteAction, BiteActionId);
+        if (ent.Comp.CanConvert)
+            _actions.AddAction(ent.Owner, ref ent.Comp.BiteAction, BiteActionId);
     }
 
     private void OnBiteAction(Entity<VampireComponent> ent, ref VampireBiteActionEvent args)
@@ -126,6 +130,75 @@ public sealed class VampireSystem : EntitySystem
         _popup.PopupEntity(Loc.GetString("vamp-bite-popup", ("victim", target)), target, target);
 
         args.Handled = true;
+    }
+
+    private void OnFeedAction(Entity<VampireComponent> ent, ref VampireFeedActionEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        if (!CanFeedTarget(ent.Owner, args.Target))
+            return;
+
+        StartFeedDoAfter(ent.Owner, args.Target);
+        args.Handled = true;
+    }
+
+    private void StartFeedDoAfter(EntityUid vampire, EntityUid target)
+    {
+        var doAfter = new DoAfterArgs(
+            EntityManager,
+            vampire,
+            TimeSpan.FromSeconds(2.5f),
+            new VampireFeedDoAfterEvent(),
+            target: target,
+            used: vampire,
+            eventTarget: vampire)
+        {
+            BreakOnDamage = true,
+            BreakOnMove = true,
+            MovementThreshold = 0.5f,
+            CancelDuplicate = false
+        };
+
+        _doAfter.TryStartDoAfter(doAfter);
+    }
+
+    private void OnFeedDoAfter(Entity<VampireComponent> ent, ref VampireFeedDoAfterEvent args)
+    {
+        if (args.Cancelled || args.Handled || args.Target == null)
+            return;
+
+        var target = args.Target.Value;
+
+        if (!CanFeedTarget(ent.Owner, target))
+            return;
+
+        ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + 5f);
+        Dirty(ent);
+
+        _popup.PopupEntity(Loc.GetString("vamp-feed-success"), ent.Owner, ent.Owner);
+
+        StartFeedDoAfter(ent.Owner, target);
+
+        args.Handled = true;
+    }
+
+    private bool CanFeedTarget(EntityUid vampire, EntityUid target)
+    {
+        if (vampire == target)
+            return false;
+
+        if (HasComp<VampireComponent>(target))
+            return false;
+
+        if (!TryComp<HumanoidAppearanceComponent>(target, out _))
+            return false;
+
+        if (!TryComp<MobStateComponent>(target, out var mobState))
+            return false;
+
+        return _mobState.IsAlive(target, mobState) || _mobState.IsCritical(target, mobState);
     }
 
     private bool CanStartTurning(EntityUid vampire, EntityUid target)
@@ -208,7 +281,7 @@ public sealed class VampireSystem : EntitySystem
         if (!vampire.CanConvert && _random.Prob(0.10f))
         {
             vampire.CanConvert = true;
-            EnsureBiteAction((uid, vampire));
+            EnsureActions((uid, vampire));
         }
 
         if (!_mind.TryGetMind(uid, out var mindId, out _))
