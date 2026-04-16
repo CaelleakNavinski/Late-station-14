@@ -4,7 +4,7 @@ namespace Content.Shared._LateStation.Vampire.Components;
 
 /// <summary>
 /// Applied to completed vampires.
-/// This slice only tracks whether the vampire may use Converting Bite.
+/// Tracks conversion permission and brood lineage.
 /// </summary>
 [RegisterComponent]
 public sealed partial class VampireComponent : Component
@@ -15,6 +15,13 @@ public sealed partial class VampireComponent : Component
     /// </summary>
     [DataField]
     public bool CanConvert = false;
+
+    /// <summary>
+    /// The body entity of the Matriarch this vampire belongs to.
+    /// For the Matriarch herself, this should be their own body entity.
+    /// </summary>
+    [DataField]
+    public EntityUid? Matriarch;
 
     /// <summary>
     /// Runtime action entity for the Converting Bite action.
