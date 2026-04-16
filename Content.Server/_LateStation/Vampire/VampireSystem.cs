@@ -24,50 +24,7 @@ namespace Content.Server._LateStation.Vampire;
 public sealed class VampireSystem : EntitySystem
 {
     private const string BiteActionId = "ActionVampireBite";
-    private const string MindRoleVampire = "MindRoleVampire";
-
-    [Dependency] private readonly ActionsSystem _actions = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
-    [Dependency] private readonly MindSystem _mind = default!;
-    [Dependency] private readonly MobStateSystem _mobState = default!;
-    [Dependency] private readonly RoleSystem _role = default!;
-    [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
-
-    public override void Initialize()
-    {
-        base.Initialize();
-
-        SubscribeLocalEvent<VampireComponent, MapInitEvent>(OnVampireMapInit);
-        SubscribeLocalEvent<VampireComponent, VampireBiteActionEvent>(OnBiteAction);
-        SubscribeLocalEvent<VampireComponent, VampireBiteDoAfterEvent>(OnBiteDoAfter);
-    }
-
-    private void OnVampireMapInit(Entity<VampireComponent> ent, ref MapInitEvent args)
-    {
-        EnsureBiteAction(ent);
-    }
-
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-
-        var query = EntityQueryEnumerator<VampireTurningComponent>();
-        while (query.MoveNext(out var uid, out var turning))
-        {
-            if (turning.NextTick > _timing.CurTime)
-                continue;
-
-            turning.NextTick = _timing.CurTime + TimeSpan.FromSeconds(1);
-            turning.Remaining -= TimeSpan.FromSeconds(1);
-
-            HandleTurningMessages(uid, turning);
-
-            if (turning.Remaining > TimeSpan.Zero)
-                continue;
-
-            CompleteTurning(uid, turning);
+    private const string MindRoleVampire = "MindRoleVamp            CompleteTurning(uid, turning);
         }
     }
 
@@ -189,3 +146,4 @@ public sealed class VampireSystem : EntitySystem
 
             return;
         }
+    }
