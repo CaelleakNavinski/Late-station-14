@@ -1,0 +1,23 @@
+- type: factionIcon
+  id: VampireFaction
+  priority: 11
+  showTo:
+    components:
+    - ShowAntagIcons
+    - Vampire
+    - VampireMatriarch
+  icon:
+    sprite: /Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi
+    state: Vampire
+
+- type: factionIcon
+  id: VampireMatriarchFaction
+  priority: 11
+  showTo:
+    components:
+    - ShowAntagIcons
+    - Vampire
+    - VampireMatriarch
+  icon:
+    sprite: /Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi
+    state: VampireMatriarch
