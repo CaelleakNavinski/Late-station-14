@@ -1196,10 +1196,12 @@ Entries:
 #- author: CFrala
 #  changes:
 #    - type: Add
-#      message: Two new antagonists and a new faction: Vampire Matriarch and Vampires!
+#      message: Something terrible has awoken from its slumber... Two new antagonists and a faction has been added to the game! Beware of Vampires and their Matriarch!
 #    - type: Add
 #      message: Silver alert level has been added. This alert level is used for occult threats to the station.
-#    - type: Fix
-#      message: 'All the custom plushies were restored and reimplemented. '
+#    - type: Tweak
+#      message: Garlic now affects Vampires.
+#    - type: Add
+#      message: Two new items have been added to combat the Vampires: the Mercy Stake (found in the ChapelVend) and stakes (craftable using wood and carving it).
 #  id: 161
 #  time: '2026-04-XXTXX:XX:XX.0000000+00:00'
