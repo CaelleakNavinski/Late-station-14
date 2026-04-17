@@ -15,8 +15,8 @@ using Robust.Shared.Utility;
 using Content.Shared.Roles.Components;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire.Components;
-using Content.Server._LateStation.GameTicking;
-using Content.Server._LateStation.GameTicking.Components;
+using Content.Server._LateStation.GameTicking.Rules;
+using Content.Server._LateStation.GameTicking.Rules.Components;
 
 namespace Content.Server.Administration.Systems;
 
