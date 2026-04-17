@@ -8,7 +8,7 @@
     - VampireMatriarch
   icon:
     sprite: /Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi
-    state: Vampire
+    state: vampire
 
 - type: factionIcon
   id: VampireMatriarchFaction
@@ -20,4 +20,4 @@
     - VampireMatriarch
   icon:
     sprite: /Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi
-    state: VampireMatriarch
+    state: vampire_matriarch
