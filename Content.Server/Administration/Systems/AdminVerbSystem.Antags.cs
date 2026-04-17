@@ -195,6 +195,8 @@ public sealed partial class AdminVerbSystem
             Impact = LogImpact.High,
             Message = string.Join(": ", paradoxCloneName, Loc.GetString("admin-verb-make-paradox-clone")),
         };
+        if (HasComp<HumanoidAppearanceComponent>(args.Target)) // only humanoids can be cloned
+            args.Verbs.Add(paradox);
 
         var vampireMatriarchName = Loc.GetString("admin-verb-text-make-paradox-clone");
         Verb vampireMatriarch = new()
@@ -241,8 +243,5 @@ public sealed partial class AdminVerbSystem
             Message = string.Join(": ", wizardName, Loc.GetString("admin-verb-make-wizard")),
         };
         args.Verbs.Add(wizard);
-
-        if (HasComp<HumanoidAppearanceComponent>(args.Target)) // only humanoids can be cloned
-            args.Verbs.Add(paradox);
     }
 }
