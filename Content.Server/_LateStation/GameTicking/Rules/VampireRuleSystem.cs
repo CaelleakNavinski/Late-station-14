@@ -95,6 +95,8 @@ public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
                 continue;
 
             var vamp = EnsureComp<VampireComponent>(body);
+            EnsureComp<VampireMatriarchComponent>(body);
+
             vamp.CanConvert = true;
             vamp.Matriarch = body;
         }
