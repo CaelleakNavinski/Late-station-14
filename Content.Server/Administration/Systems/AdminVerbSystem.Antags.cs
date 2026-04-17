@@ -13,6 +13,10 @@ using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 using Content.Shared.Roles.Components;
+using Content.Shared._LateStation.Roles.Components;
+using Content.Shared._LateStation.Vampire.Components;
+using Content.Server._LateStation.GameTicking;
+using Content.Server._LateStation.GameTicking.Components;
 
 namespace Content.Server.Administration.Systems;
 
@@ -31,6 +35,7 @@ public sealed partial class AdminVerbSystem
     private static readonly EntProtoId DefaultChangelingRule = "Changeling";
     private static readonly EntProtoId ParadoxCloneRuleId = "ParadoxCloneSpawn";
     private static readonly EntProtoId DefaultWizardRule = "Wizard";
+    private static readonly EntProtoId DefaultVampireRule = "Vampire";
     private static readonly ProtoId<StartingGearPrototype> PirateGearId = "PirateGear";
 
     // All antag verbs have names so invokeverb works.
@@ -190,6 +195,36 @@ public sealed partial class AdminVerbSystem
             Impact = LogImpact.High,
             Message = string.Join(": ", paradoxCloneName, Loc.GetString("admin-verb-make-paradox-clone")),
         };
+
+        var vampireMatriarchName = Loc.GetString("admin-verb-text-make-paradox-clone");
+        Verb vampireMatriarch = new()
+        {
+             Text = vampireMatriarchName,
+             Category = VerbCategory.Antag,
+             Icon = new SpriteSpecifier.Rsi(new("/Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi"), "vampire_matriarch"),
+             Act = () =>
+            {
+                RemComp<VampireTurningComponent>(args.Target);
+
+                var vampireComp = EnsureComp<VampireComponent>(args.Target);
+                vampireComp.CanConvert = true;
+                vampireComp.Matriarch = args.Target;
+
+                if (_mindSystem.TryGetMind(args.Target, out var mindId, out _))
+                {
+                    _role.MindRemoveRole<VampireRoleComponent>(mindId);
+
+                    if (!_role.MindHasRole<VampireMatriarchRoleComponent>(mindId))
+                        _role.MindAddRole(mindId, "MindRoleVampireMatriarch");
+                }
+
+                _antag.SendBriefing(args.Target, Loc.GetString("vamp-mat-role-greeting"), Color.Red, null);
+            },
+            Impact = LogImpact.High,
+            Message = string.Join(": ", vampireMatriarchName, Loc.GetString("admin-verb-make-vampire-matriarch")),
+        };
+        if (HasComp<HumanoidAppearanceComponent>(args.Target)) 
+            args.Verbs.Add(vampireMatriarch);
 
         var wizardName = Loc.GetString("admin-verb-text-make-wizard");
         Verb wizard = new()
