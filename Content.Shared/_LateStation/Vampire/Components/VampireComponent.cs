@@ -1,5 +1,6 @@
 using System;
 using Robust.Shared.GameObjects;
+using Robust.Shared.GameStates;
 using Content.Shared.StatusIcon;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
@@ -10,7 +11,7 @@ namespace Content.Shared._LateStation.Vampire.Components;
 /// Applied to completed vampires.
 /// Tracks conversion permission, brood lineage, and blood resource state.
 /// </summary>
-[RegisterComponent]
+[RegisterComponent, NetworkedComponent]
 public sealed partial class VampireComponent : Component
 {
     [DataField]
