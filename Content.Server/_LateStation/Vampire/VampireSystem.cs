@@ -1,5 +1,6 @@
 using System;
 using Content.Server.Actions;
+using Content.Server.Antag;
 using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Shared.DoAfter;
@@ -30,6 +31,7 @@ public sealed class VampireSystem : EntitySystem
     private const string MindRoleVampire = "MindRoleVampire";
 
     [Dependency] private readonly ActionsSystem _actions = default!;
+    [Dependency] private readonly AntagSelectionSystem _antag = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly MindSystem _mind = default!;
@@ -336,7 +338,7 @@ public sealed class VampireSystem : EntitySystem
 
         _role.MindAddRole(mindId, MindRoleVampire);
 
-        _popup.PopupEntity(Loc.GetString("vamp-role-greeting"), uid, uid);
+        _antag.SendBriefing(uid, Loc.GetString("vamp-role-greeting"), Color.Red, null);
     }
 
     private EntityUid? ResolveMatriarch(EntityUid? source)
