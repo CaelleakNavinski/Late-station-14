@@ -1,13 +1,14 @@
 using Content.Server.Antag;
-using Content.Server.GameTicking.Rules.Components;
+using Content.Server.GameTicking.Rules;
 using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Server.RoundEnd;
+using Content.Server._LateStation.GameTicking.Rules.Components;
 using Content.Shared.GameTicking.Components;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire.Components;
 
-namespace Content.Server.GameTicking.Rules;
+namespace Content.Server._LateStation.GameTicking.Rules;
 
 /// <summary>
 /// Baseline Vampire round-rule scaffold.
@@ -37,7 +38,11 @@ public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
         args.Append(Loc.GetString("vamp-briefing"));
     }
 
-    protected override void Started(EntityUid uid, VampireRuleComponent component, GameRuleComponent gameRule, GameRuleStartedEvent args)
+    protected override void Started(
+        EntityUid uid,
+        VampireRuleComponent component,
+        GameRuleComponent gameRule,
+        GameRuleStartedEvent args)
     {
         base.Started(uid, component, gameRule, args);
 
