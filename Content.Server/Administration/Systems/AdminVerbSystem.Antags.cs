@@ -198,7 +198,7 @@ public sealed partial class AdminVerbSystem
         if (HasComp<HumanoidAppearanceComponent>(args.Target)) // only humanoids can be cloned
             args.Verbs.Add(paradox);
 
-        var vampireMatriarchName = Loc.GetString("admin-verb-text-make-paradox-clone");
+        var vampireMatriarchName = Loc.GetString("admin-verb-text-make-vampire-matriarch");
         Verb vampireMatriarch = new()
         {
              Text = vampireMatriarchName,
