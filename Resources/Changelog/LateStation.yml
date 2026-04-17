@@ -1193,3 +1193,13 @@ Entries:
   changes: []
   id: 161
   time: '2026-02-14T10:29:43.0000000+00:00'
+#- author: CFrala
+#  changes:
+#    - type: Add
+#      message: Two new antagonists and a new faction: Vampire Matriarch and Vampires!
+#    - type: Add
+#      message: Silver alert level has been added. This alert level is used for occult threats to the station.
+#    - type: Fix
+#      message: 'All the custom plushies were restored and reimplemented. '
+#  id: 161
+#  time: '2026-04-XXTXX:XX:XX.0000000+00:00'
