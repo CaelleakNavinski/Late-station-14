@@ -1,5 +1,7 @@
 using System;
 using Robust.Shared.GameObjects;
+using Content.Shared.StatusIcon;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared._LateStation.Vampire.Components;
@@ -11,6 +13,10 @@ namespace Content.Shared._LateStation.Vampire.Components;
 [RegisterComponent]
 public sealed partial class VampireComponent : Component
 {
+    [DataField]
+    public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
+    public override bool SessionSpecific => true;
+    
     [DataField]
     public bool CanConvert = false;
 
