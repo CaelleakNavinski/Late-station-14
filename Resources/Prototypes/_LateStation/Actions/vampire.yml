@@ -6,6 +6,9 @@
   components:
   - type: Action
     itemIconStyle: BigAction
+    icon:
+      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      state: sire_bite
   - type: TargetAction
   - type: EntityTargetAction
     event: !type:VampireBiteActionEvent
@@ -18,6 +21,9 @@
   components:
   - type: Action
     itemIconStyle: BigAction
+    icon:
+      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      state: feed
   - type: TargetAction
   - type: EntityTargetAction
     event: !type:VampireFeedActionEvent
