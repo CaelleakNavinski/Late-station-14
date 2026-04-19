@@ -131,18 +131,17 @@ public sealed class VampireSystem : EntitySystem
 
     private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
     {
-        if (comp.MaxBlood <= 0f)
-            return;
 
         var ratio = comp.Blood / comp.MaxBlood;
 
         short severity = ratio switch
         {
-            <= 0.20f => 0,
-            <= 0.45f => 1,
-            <= 0.70f => 2,
-            <= 0.90f => 3,
-            _ => 4
+            <= 0.08f => 0,
+            <= 0.25f => 1,
+            <= 0.45f => 2,
+            <= 0.65f => 3,
+            <= 0.85f => 4,
+            _ => 5
         };
 
         _alerts.ShowAlert(uid, BloodAlertId, severity);
