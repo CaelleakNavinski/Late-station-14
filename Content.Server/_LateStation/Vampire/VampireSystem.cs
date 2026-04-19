@@ -3,6 +3,7 @@ using Content.Server.Actions;
 using Content.Server.Antag;
 using Content.Server.Mind;
 using Content.Server.Roles;
+using Content.Shared.Alert;
 using Content.Shared.DoAfter;
 using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Components;
@@ -27,10 +28,12 @@ namespace Content.Server._LateStation.Vampire;
 public sealed class VampireSystem : EntitySystem
 {
     private const string BiteActionId = "ActionVampireBite";
+    private const string BloodAlertId = "VampireBloodMeter";
     private const string FeedActionId = "ActionVampireFeed";
     private const string MindRoleVampire = "MindRoleVampire";
 
     [Dependency] private readonly ActionsSystem _actions = default!;
+    [Dependency] private readonly AlertsSystem _alerts = default!;
     [Dependency] private readonly AntagSelectionSystem _antag = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
@@ -70,8 +73,8 @@ public sealed class VampireSystem : EntitySystem
         var vampireQuery = EntityQueryEnumerator<VampireComponent>();
         while (vampireQuery.MoveNext(out var uid, out var vampire))
         {
-            SyncActions((uid, vampire));
             ProcessBloodDecay((uid, vampire));
+            UpdateBloodAlert(uid, vampire);
         }
 
         var turningQuery = EntityQueryEnumerator<VampireTurningComponent>();
@@ -124,6 +127,25 @@ public sealed class VampireSystem : EntitySystem
         ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - 1f);
         ent.Comp.NextBloodDecayTick = _timing.CurTime + ent.Comp.BloodDecayInterval;
         Dirty(ent.Owner, ent.Comp);
+    }
+
+    private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
+    {
+        if (comp.MaxBlood <= 0f)
+            return;
+
+        var ratio = comp.Blood / comp.MaxBlood;
+
+        short severity = ratio switch
+        {
+            <= 0.20f => 0,
+            <= 0.45f => 1,
+            <= 0.70f => 2,
+            <= 0.90f => 3,
+            _ => 4
+        };
+
+        _alerts.ShowAlert(uid, BloodAlertId, severity);
     }
 
     private void OnBiteAction(Entity<VampireComponent> ent, ref VampireBiteActionEvent args)
