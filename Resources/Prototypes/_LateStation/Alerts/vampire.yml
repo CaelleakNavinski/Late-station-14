@@ -2,7 +2,7 @@
   id: VampireBloodMeter
   category: Hunger
   icons:
-  - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood_meter.rsi
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
     state: blood_meter0
 #  - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
 #    state: blood_meter1
