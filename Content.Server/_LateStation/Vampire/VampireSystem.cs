@@ -137,10 +137,10 @@ public sealed class VampireSystem : EntitySystem
         short severity = ratio switch
         {
             <= 0.08f => 0,
-            <= 0.25f => 1,
-            <= 0.45f => 2,
-            <= 0.65f => 3,
-            <= 0.85f => 4,
+            <= 0.22f => 1,
+            <= 0.44f => 2,
+            <= 0.66f => 3,
+            <= 0.88f => 4,
             _ => 5
         };
 
