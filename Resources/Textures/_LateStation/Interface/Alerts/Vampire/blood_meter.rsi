@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Created by CFrala (github)",
+    "size": {
+        "x": 32,
+        "y": 39
+    }
+    "states": [
+        {
+            "name": "blood_meter0"
+        }
+    ]
+}
