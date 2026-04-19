@@ -132,19 +132,20 @@ public sealed class VampireSystem : EntitySystem
     private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
     {
 
-        var ratio = comp.Blood / comp.MaxBlood;
+        //var ratio = comp.Blood / comp.MaxBlood;
 
-        short severity = ratio switch
-        {
-            <= 0.08f => 0,
-            <= 0.22f => 1,
-            <= 0.44f => 2,
-            <= 0.66f => 3,
-            <= 0.88f => 4,
-            _ => 5
-        };
+        //short severity = ratio switch
+        //{
+        //    <= 0.08f => 0,
+        //    <= 0.22f => 1,
+        //    <= 0.44f => 2,
+        //    <= 0.66f => 3,
+        //    <= 0.88f => 4,
+        //    _ => 5
+        //};
 
-        _alerts.ShowAlert(uid, BloodAlertId, severity);
+        //_alerts.ShowAlert(uid, BloodAlertId, severity);
+        _alerts.ShowAlert(uid, "Peckish");
     }
 
     private void OnBiteAction(Entity<VampireComponent> ent, ref VampireBiteActionEvent args)
