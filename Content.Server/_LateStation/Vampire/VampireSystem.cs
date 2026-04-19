@@ -73,6 +73,7 @@ public sealed class VampireSystem : EntitySystem
         var vampireQuery = EntityQueryEnumerator<VampireComponent>();
         while (vampireQuery.MoveNext(out var uid, out var vampire))
         {
+            SyncActions((uid, vampire));
             ProcessBloodDecay((uid, vampire));
             UpdateBloodAlert(uid, vampire);
         }
@@ -274,7 +275,7 @@ public sealed class VampireSystem : EntitySystem
         if (!TryComp<HumanoidAppearanceComponent>(target, out _))
             return false;
 
-        if (HasComp<VampireComponent>(target))
+        if (HasComp<VampireComponent>(target) || HasComp<VampireMatriarchComponent>(target))
         {
             _popup.PopupEntity(
                 Loc.GetString("vamp-target-immune-other-vamp-popup", ("victim", target)),
@@ -345,6 +346,7 @@ public sealed class VampireSystem : EntitySystem
 
         if (!vampire.CanConvert && _random.Prob(0.10f))
             vampire.CanConvert = true;
+            SyncActions((uid, vampire));
 
         SyncActions((uid, vampire));
 
@@ -358,7 +360,7 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         _role.MindAddRole(mindId, MindRoleVampire);
-
+ 
         _antag.SendBriefing(uid, Loc.GetString("vamp-role-greeting"), Color.Red, null);
     }
 
