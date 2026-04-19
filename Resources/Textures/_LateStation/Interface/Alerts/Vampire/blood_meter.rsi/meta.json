@@ -9,6 +9,21 @@
     "states": [
         {
             "name": "blood_meter0"
+        },
+        {
+            "name": "blood_meter1"
+        },
+        {
+            "name": "blood_meter2"
+        },
+        {
+            "name": "blood_meter3"
+        },
+        {
+            "name": "blood_meter4"
+        },
+        {
+            "name": "blood_meter5"
         }
     ]
 }
