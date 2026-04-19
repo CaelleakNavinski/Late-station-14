@@ -1,17 +1,26 @@
 {
     "version": 1,
     "license": "CC0-1.0",
-    "copyright": "Created by CFrala (github)",
+    "copyright": "Created by rcoi (discord)",
     "size": {
         "x": 24,
         "y": 24
     },
     "states": [
         {
-            "name": "vampire"
+            "name": "blood_meter0"
         },
         {
-            "name": "vampire_matriarch"
+            "name": "blood_meter1"
+        },
+        {
+            "name": "blood_meter2"
+        },
+        {
+            "name": "blood_meter3"
+        },
+        {
+            "name": "blood_meter4"
         }
     ]
 }
