@@ -1,19 +1,18 @@
 - type: alert
   id: VampireBloodMeter
-  category: Hunger
   icons:
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter0
+    state: power0
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter1
+    state: power1
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter2
+    state: power2
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter3
+    state: power3
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter4
+    state: power4
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
-    state: blood_meter5
+    state: power5
   name: alerts-vampire-blood-name
   description: alerts-vampire-blood-desc
   minSeverity: 0
