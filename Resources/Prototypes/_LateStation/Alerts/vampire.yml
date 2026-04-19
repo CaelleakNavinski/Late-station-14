@@ -4,17 +4,17 @@
   icons:
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
     state: blood_meter0
-   - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
-     state: blood_meter1
-   - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
-     state: blood_meter2
-   - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
-     state: blood_meter3
-   - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
-     state: blood_meter4
-   - sprite: /Textures/_LateStation/Interface/Alerts/vampire_blood.rsi
-     state: blood_meter5
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
+    state: blood_meter1
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
+    state: blood_meter2
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
+    state: blood_meter3
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
+    state: blood_meter4
+  - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
+    state: blood_meter5
   name: alerts-vampire-blood-name
   description: alerts-vampire-blood-desc
-   minSeverity: 0
-   maxSeverity: 5
+  minSeverity: 0
+  maxSeverity: 5
