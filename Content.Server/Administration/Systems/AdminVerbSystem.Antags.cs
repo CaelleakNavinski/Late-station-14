@@ -209,8 +209,6 @@ public sealed partial class AdminVerbSystem
                 RemComp<VampireTurningComponent>(args.Target);
 
                 var vampireComp = EnsureComp<VampireComponent>(args.Target);
-                vampireComp.CanConvert = true;
-                vampireComp.Matriarch = args.Target;
 
                 if (_mindSystem.TryGetMind(args.Target, out var mindId, out _))
                 {
@@ -219,6 +217,9 @@ public sealed partial class AdminVerbSystem
                     if (!_role.MindHasRole<VampireMatriarchRoleComponent>(mindId))
                         _role.MindAddRole(mindId, "MindRoleVampireMatriarch");
                 }
+
+                vampireComp.IsExarch = true;
+                vampireComp.Matriarch = args.Target;
 
                 _antag.SendBriefing(args.Target, Loc.GetString("vamp-mat-role-greeting"), Color.Red, null);
             },
