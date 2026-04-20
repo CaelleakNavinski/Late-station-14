@@ -1,6 +1,10 @@
 using System;
 using Content.Server.Actions;
 using Content.Server.Antag;
+using Content.Shared.Body.Components;
+using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.FixedPoint;
 using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Shared.Alert;
@@ -40,7 +44,9 @@ public sealed class VampireSystem : EntitySystem
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly RoleSystem _role = default!;
+    [Dependency] private readonly SharedBloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
 
     public override void Initialize()
@@ -201,10 +207,13 @@ public sealed class VampireSystem : EntitySystem
     {
         if (args.Handled)
             return;
-
+    
+        if (ent.Comp.Blood >= ent.Comp.MaxBlood)
+            return;
+    
         if (!CanFeedTarget(ent.Owner, args.Target))
             return;
-
+    
         StartFeedDoAfter(ent.Owner, args.Target);
         args.Handled = true;
     }
@@ -233,38 +242,77 @@ public sealed class VampireSystem : EntitySystem
     {
         if (args.Cancelled || args.Handled || args.Target == null)
             return;
-
+    
         var target = args.Target.Value;
-
+    
         if (!CanFeedTarget(ent.Owner, target))
             return;
-
-        ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + 5f);
+    
+        if (ent.Comp.Blood >= ent.Comp.MaxBlood)
+            return;
+    
+        if (!TryDrainFeedBlood(target, ent.Comp, out var gainedBlood))
+            return;
+    
+        ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + gainedBlood);
         ent.Comp.LastFeedTime = _timing.CurTime;
         ent.Comp.NextBloodDecayTick =
             _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
         Dirty(ent.Owner, ent.Comp);
-
-        StartFeedDoAfter(ent.Owner, target);
-
+    
+        if (ent.Comp.Blood < ent.Comp.MaxBlood && CanFeedTarget(ent.Owner, target))
+            StartFeedDoAfter(ent.Owner, target);
+    
         args.Handled = true;
     }
-
     private bool CanFeedTarget(EntityUid vampire, EntityUid target)
     {
         if (vampire == target)
             return false;
-
+    
         if (HasComp<VampireComponent>(target))
             return false;
-
+    
         if (!TryComp<HumanoidAppearanceComponent>(target, out _))
             return false;
-
+    
         if (!TryComp<MobStateComponent>(target, out var mobState))
             return false;
+    
+        if (!_mobState.IsAlive(target, mobState) && !_mobState.IsCritical(target, mobState))
+            return false;
+    
+        if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
+            return false;
+    
+        if (!_solutionContainer.ResolveSolution((target, bloodstream), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
+            return false;
+    
+        return bloodSolution.Volume > FixedPoint2.Zero;
+    }
 
-        return _mobState.IsAlive(target, mobState) || _mobState.IsCritical(target, mobState);
+    private bool TryDrainFeedBlood(EntityUid target, VampireComponent vampire, out float gainedBlood)
+    {
+        gainedBlood = 0f;
+    
+        if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
+            return false;
+    
+        if (!_solutionContainer.ResolveSolution((target, bloodstream), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
+            return false;
+    
+        if (bloodSolution.Volume <= FixedPoint2.Zero)
+            return false;
+    
+        var drainedBlood = bloodSolution.Volume * vampire.FeedTargetBloodDrainFraction;
+        if (drainedBlood <= FixedPoint2.Zero)
+            return false;
+    
+        if (!_bloodstream.TryModifyBloodLevel((target, bloodstream), -drainedBlood))
+            return false;
+    
+        gainedBlood = drainedBlood.Float() * vampire.FeedEfficiency;
+        return gainedBlood > 0f;
     }
 
     private bool CanStartTurning(EntityUid vampire, EntityUid target)
