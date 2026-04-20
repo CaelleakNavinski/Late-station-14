@@ -312,12 +312,21 @@ public sealed class VampireSystem : EntitySystem
         if (bloodSolution.Volume <= FixedPoint2.Zero)
             return false;
     
-        var drainedBlood = bloodSolution.Volume * vampire.FeedTargetBloodDrainFraction;
+        var missingBlood = vampire.MaxBlood - vampire.Blood;
+        if (missingBlood <= 0f)
+            return false;
+    
+        if (vampire.FeedEfficiency <= 0f)
+            return false;
+    
+        var desiredDrain = bloodSolution.Volume * vampire.FeedTargetBloodDrainFraction;
+        var maxUsefulDrain = FixedPoint2.New(missingBlood / vampire.FeedEfficiency);
+        var drainedBlood = FixedPoint2.Min(desiredDrain, bloodSolution.Volume, maxUsefulDrain);
+    
         if (drainedBlood <= FixedPoint2.Zero)
             return false;
     
-        if (!_bloodstream.TryModifyBloodLevel((target, bloodstream), -drainedBlood))
-            return false;
+        _solutionContainer.SplitSolution(bloodstream.BloodSolution.Value, drainedBlood);
     
         gainedBlood = drainedBlood.Float() * vampire.FeedEfficiency;
         return gainedBlood > 0f;
