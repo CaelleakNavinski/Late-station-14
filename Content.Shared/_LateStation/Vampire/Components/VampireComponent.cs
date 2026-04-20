@@ -1,7 +1,7 @@
 using System;
+using Content.Shared.StatusIcon;
 using Robust.Shared.GameObjects;
 using Robust.Shared.GameStates;
-using Content.Shared.StatusIcon;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
@@ -16,8 +16,9 @@ public sealed partial class VampireComponent : Component
 {
     [DataField]
     public ProtoId<FactionIconPrototype> StatusIcon { get; set; } = "VampireFaction";
+
     public override bool SessionSpecific => true;
-    
+
     [DataField]
     public bool CanConvert = false;
 
@@ -29,6 +30,20 @@ public sealed partial class VampireComponent : Component
 
     [DataField]
     public float MaxBlood = 100f;
+
+    /// <summary>
+    /// The percentage of the victim's current bloodstream volume removed on each completed feed cycle.
+    /// Example: 0.05 = 5% of their current blood.
+    /// </summary>
+    [DataField]
+    public float FeedTargetBloodDrainFraction = 0.05f;
+
+    /// <summary>
+    /// How efficiently extracted victim blood becomes vampire blood.
+    /// Example: 0.33 means draining 15 victim blood yields about 5 vampire blood.
+    /// </summary>
+    [DataField]
+    public float FeedEfficiency = 0.33f;
 
     /// <summary>
     /// After 60 seconds without a successful feed, blood begins decaying.
