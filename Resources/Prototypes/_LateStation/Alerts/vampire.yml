@@ -1,5 +1,6 @@
 - type: alert
   id: VampireBloodMeter
+  category: hunger
   icons:
   - sprite: /Textures/_LateStation/Interface/Alerts/Vampire/blood_meter.rsi
     state: blood_meter0
