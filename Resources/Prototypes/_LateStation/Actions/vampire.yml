@@ -27,3 +27,15 @@
   - type: TargetAction
   - type: EntityTargetAction
     event: !type:VampireFeedActionEvent
+
+- type: entity
+  id: ActionVampireBloodSprint
+  parent: BaseAction
+  name: Bloodsprint
+  description: Burn blood to move with spernatural quickness for a few seconds.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 20
+  - type: InstantAction
+    event: !type:VampireBloodSprintActionEvent

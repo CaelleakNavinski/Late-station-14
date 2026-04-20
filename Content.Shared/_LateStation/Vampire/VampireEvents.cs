@@ -5,9 +5,16 @@ using Robust.Shared.Serialization;
 namespace Content.Shared._LateStation.Vampire;
 
 /// <summary>
-/// Raised when a vampire with conversion permission targets someone with Converting Bite.
+/// Raised when a vampire with sire-tier permission targets someone with Converting Bite.
 /// </summary>
 public sealed partial class VampireBiteActionEvent : EntityTargetActionEvent
+{
+}
+
+/// <summary>
+/// Raised when a vampire activates Bloodsprint.
+/// </summary>
+public sealed partial class VampireBloodSprintActionEvent : InstantActionEvent
 {
 }
 

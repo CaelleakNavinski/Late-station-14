@@ -1,18 +1,18 @@
 using System;
 using Content.Server.Actions;
 using Content.Server.Antag;
-using Content.Shared.Body.Components;
-using Content.Shared.Body.Systems;
-using Content.Shared.Chemistry.Components.SolutionManager;
-using Content.Shared.Chemistry.EntitySystems;
-using Content.Shared.FixedPoint;
 using Content.Server.Mind;
 using Content.Server.Roles;
 using Content.Shared.Alert;
+using Content.Shared.Body.Components;
+using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.DoAfter;
+using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire;
@@ -34,6 +34,7 @@ public sealed class VampireSystem : EntitySystem
 {
     private const string BiteActionId = "ActionVampireBite";
     private const string BloodAlertId = "VampireBloodMeter";
+    private const string BloodSprintActionId = "ActionVampireBloodSprint";
     private const string FeedActionId = "ActionVampireFeed";
     private const string MindRoleVampire = "MindRoleVampire";
 
@@ -44,8 +45,8 @@ public sealed class VampireSystem : EntitySystem
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly MovementSpeedModifierSystem _movementSpeed = default!;
     [Dependency] private readonly RoleSystem _role = default!;
-    [Dependency] private readonly SharedBloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
@@ -56,8 +57,10 @@ public sealed class VampireSystem : EntitySystem
 
         SubscribeLocalEvent<VampireComponent, ComponentStartup>(OnVampireStartup);
         SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
+        SubscribeLocalEvent<VampireComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshMovementSpeedModifiers);
         SubscribeLocalEvent<VampireComponent, VampireBiteActionEvent>(OnBiteAction);
         SubscribeLocalEvent<VampireComponent, VampireBiteDoAfterEvent>(OnBiteDoAfter);
+        SubscribeLocalEvent<VampireComponent, VampireBloodSprintActionEvent>(OnBloodSprintAction);
         SubscribeLocalEvent<VampireComponent, VampireFeedActionEvent>(OnFeedAction);
         SubscribeLocalEvent<VampireComponent, VampireFeedDoAfterEvent>(OnFeedDoAfter);
     }
@@ -71,11 +74,14 @@ public sealed class VampireSystem : EntitySystem
     {
         _actions.RemoveAction(ent.Owner, ent.Comp.BiteAction);
         _actions.RemoveAction(ent.Owner, ent.Comp.FeedAction);
+        _actions.RemoveAction(ent.Owner, ent.Comp.BloodSprintAction);
     }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+
+        var curTime = _timing.CurTime;
 
         var vampireQuery = EntityQueryEnumerator<VampireComponent>();
         while (vampireQuery.MoveNext(out var uid, out var vampire))
@@ -83,15 +89,22 @@ public sealed class VampireSystem : EntitySystem
             SyncActions((uid, vampire));
             ProcessBloodDecay((uid, vampire));
             UpdateBloodAlert(uid, vampire);
+
+            if (vampire.BloodSprintEndTime != TimeSpan.Zero && vampire.BloodSprintEndTime <= curTime)
+            {
+                vampire.BloodSprintEndTime = TimeSpan.Zero;
+                Dirty(uid, vampire);
+                _movementSpeed.RefreshMovementSpeedModifiers(uid);
+            }
         }
 
         var turningQuery = EntityQueryEnumerator<VampireTurningComponent>();
         while (turningQuery.MoveNext(out var uid, out var turning))
         {
-            if (turning.NextTick > _timing.CurTime)
+            if (turning.NextTick > curTime)
                 continue;
 
-            turning.NextTick = _timing.CurTime + TimeSpan.FromSeconds(1);
+            turning.NextTick = curTime + TimeSpan.FromSeconds(1);
             turning.Remaining -= TimeSpan.FromSeconds(1);
 
             HandleTurningMessages(uid, turning);
@@ -107,9 +120,10 @@ public sealed class VampireSystem : EntitySystem
     {
         _actions.AddAction(ent.Owner, ref ent.Comp.FeedAction, FeedActionId);
 
-        if (ent.Comp.CanConvert)
+        if (HasSireAbilities(ent.Owner, ent.Comp))
         {
             _actions.AddAction(ent.Owner, ref ent.Comp.BiteAction, BiteActionId);
+            _actions.AddAction(ent.Owner, ref ent.Comp.BloodSprintAction, BloodSprintActionId);
             return;
         }
 
@@ -118,6 +132,26 @@ public sealed class VampireSystem : EntitySystem
             _actions.RemoveAction(ent.Owner, ent.Comp.BiteAction);
             ent.Comp.BiteAction = null;
         }
+
+        if (ent.Comp.BloodSprintAction != null)
+        {
+            _actions.RemoveAction(ent.Owner, ent.Comp.BloodSprintAction);
+            ent.Comp.BloodSprintAction = null;
+        }
+    }
+
+    private bool HasSireAbilities(EntityUid uid, VampireComponent comp)
+    {
+        if (comp.IsExarch)
+            return true;
+
+        if (_mind.TryGetMind(uid, out var mindId, out _) &&
+            _role.MindHasRole<VampireMatriarchRoleComponent>(mindId, out _))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void ProcessBloodDecay(Entity<VampireComponent> ent)
@@ -139,7 +173,6 @@ public sealed class VampireSystem : EntitySystem
 
     private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
     {
-
         var ratio = comp.Blood / comp.MaxBlood;
 
         short severity = ratio switch
@@ -155,9 +188,40 @@ public sealed class VampireSystem : EntitySystem
         _alerts.ShowAlert(uid, BloodAlertId, severity);
     }
 
+    private void OnRefreshMovementSpeedModifiers(Entity<VampireComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
+    {
+        if (ent.Comp.BloodSprintEndTime <= _timing.CurTime)
+            return;
+
+        args.ModifySpeed(ent.Comp.BloodSprintWalkSpeedModifier, ent.Comp.BloodSprintSprintSpeedModifier);
+    }
+
+    private void OnBloodSprintAction(Entity<VampireComponent> ent, ref VampireBloodSprintActionEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        if (!HasSireAbilities(ent.Owner, ent.Comp))
+            return;
+
+        if (ent.Comp.Blood < ent.Comp.BloodSprintCost)
+            return;
+
+        ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - ent.Comp.BloodSprintCost);
+        ent.Comp.BloodSprintEndTime = _timing.CurTime + ent.Comp.BloodSprintDuration;
+        ent.Comp.LastFeedTime = _timing.CurTime;
+        ent.Comp.NextBloodDecayTick =
+            _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
+
+        Dirty(ent.Owner, ent.Comp);
+        _movementSpeed.RefreshMovementSpeedModifiers(ent.Owner);
+
+        args.Handled = true;
+    }
+
     private void OnBiteAction(Entity<VampireComponent> ent, ref VampireBiteActionEvent args)
     {
-        if (args.Handled || !ent.Comp.CanConvert)
+        if (args.Handled || !HasSireAbilities(ent.Owner, ent.Comp))
             return;
 
         if (!CanStartTurning(ent.Owner, args.Target))
@@ -208,13 +272,13 @@ public sealed class VampireSystem : EntitySystem
     {
         if (args.Handled)
             return;
-    
+
         if (ent.Comp.Blood >= ent.Comp.MaxBlood)
             return;
-    
+
         if (!CanFeedTarget(ent.Owner, args.Target))
             return;
-    
+
         StartFeedDoAfter(ent.Owner, args.Target);
         args.Handled = true;
     }
@@ -243,91 +307,91 @@ public sealed class VampireSystem : EntitySystem
     {
         if (args.Cancelled || args.Handled || args.Target == null)
             return;
-    
+
         var target = args.Target.Value;
-    
+
         if (!CanFeedTarget(ent.Owner, target))
             return;
-    
+
         if (ent.Comp.Blood >= ent.Comp.MaxBlood)
             return;
-    
+
         if (!TryDrainFeedBlood(target, ent.Comp, out var gainedBlood))
             return;
-    
+
         ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + gainedBlood);
         ent.Comp.LastFeedTime = _timing.CurTime;
         ent.Comp.NextBloodDecayTick =
             _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
         Dirty(ent.Owner, ent.Comp);
-    
+
         if (ent.Comp.Blood < ent.Comp.MaxBlood && CanFeedTarget(ent.Owner, target))
             StartFeedDoAfter(ent.Owner, target);
-    
+
         args.Handled = true;
     }
-    
+
     private bool CanFeedTarget(EntityUid vampire, EntityUid target)
     {
         if (vampire == target)
             return false;
-    
+
         if (HasComp<VampireComponent>(target))
             return false;
-    
+
         if (!TryComp<HumanoidAppearanceComponent>(target, out _))
             return false;
-    
+
         if (!TryComp<MobStateComponent>(target, out var mobState))
             return false;
-    
+
         if (!_mobState.IsAlive(target, mobState) && !_mobState.IsCritical(target, mobState))
             return false;
-    
+
         if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
             return false;
-    
+
         if (!TryComp<SolutionContainerManagerComponent>(target, out var solutionManager))
             return false;
-    
+
         if (!_solutionContainer.ResolveSolution((target, solutionManager), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
             return false;
-    
+
         return bloodSolution.Volume > FixedPoint2.Zero;
     }
 
     private bool TryDrainFeedBlood(EntityUid target, VampireComponent vampire, out float gainedBlood)
     {
         gainedBlood = 0f;
-    
+
         if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
             return false;
-    
+
         if (!TryComp<SolutionContainerManagerComponent>(target, out var solutionManager))
             return false;
-    
+
         if (!_solutionContainer.ResolveSolution((target, solutionManager), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
             return false;
-    
+
         if (bloodSolution.Volume <= FixedPoint2.Zero)
             return false;
-    
+
         var missingBlood = vampire.MaxBlood - vampire.Blood;
         if (missingBlood <= 0f)
             return false;
-    
+
         if (vampire.FeedEfficiency <= 0f)
             return false;
-    
+
         var desiredDrain = bloodSolution.Volume * vampire.FeedTargetBloodDrainFraction;
         var maxUsefulDrain = FixedPoint2.New(missingBlood / vampire.FeedEfficiency);
         var drainedBlood = FixedPoint2.Min(desiredDrain, bloodSolution.Volume, maxUsefulDrain);
-    
+
         if (drainedBlood <= FixedPoint2.Zero)
             return false;
-    
+
         _solutionContainer.SplitSolution(bloodstream.BloodSolution.Value, drainedBlood);
-    
+
         gainedBlood = drainedBlood.Float() * vampire.FeedEfficiency;
         return gainedBlood > 0f;
     }
@@ -409,9 +473,8 @@ public sealed class VampireSystem : EntitySystem
         var vampire = EnsureComp<VampireComponent>(uid);
         vampire.Matriarch = ResolveMatriarch(comp.Source);
 
-        if (!vampire.CanConvert && _random.Prob(0.10f))
-            vampire.CanConvert = true;
-            SyncActions((uid, vampire));
+        if (!vampire.IsExarch && _random.Prob(0.10f))
+            vampire.IsExarch = true;
 
         SyncActions((uid, vampire));
 
@@ -425,7 +488,7 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         _role.MindAddRole(mindId, MindRoleVampire);
- 
+
         _antag.SendBriefing(uid, Loc.GetString("vamp-role-greeting"), Color.Red, null);
     }
 
