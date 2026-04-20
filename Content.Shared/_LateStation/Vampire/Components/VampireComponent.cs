@@ -20,7 +20,7 @@ public sealed partial class VampireComponent : Component
     public override bool SessionSpecific => true;
 
     [DataField]
-    public bool CanConvert = false;
+    public bool IsExarch = false;
 
     [DataField]
     public EntityUid? Matriarch;
