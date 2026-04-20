@@ -3,6 +3,7 @@ using Content.Server.Actions;
 using Content.Server.Antag;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
 using Content.Server.Mind;
@@ -265,6 +266,7 @@ public sealed class VampireSystem : EntitySystem
     
         args.Handled = true;
     }
+    
     private bool CanFeedTarget(EntityUid vampire, EntityUid target)
     {
         if (vampire == target)
@@ -285,7 +287,10 @@ public sealed class VampireSystem : EntitySystem
         if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
             return false;
     
-        if (!_solutionContainer.ResolveSolution((target, bloodstream), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
+        if (!TryComp<SolutionContainerManagerComponent>(target, out var solutionManager))
+            return false;
+    
+        if (!_solutionContainer.ResolveSolution((target, solutionManager), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
             return false;
     
         return bloodSolution.Volume > FixedPoint2.Zero;
@@ -298,7 +303,10 @@ public sealed class VampireSystem : EntitySystem
         if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
             return false;
     
-        if (!_solutionContainer.ResolveSolution((target, bloodstream), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
+        if (!TryComp<SolutionContainerManagerComponent>(target, out var solutionManager))
+            return false;
+    
+        if (!_solutionContainer.ResolveSolution((target, solutionManager), bloodstream.BloodSolutionName, ref bloodstream.BloodSolution, out var bloodSolution))
             return false;
     
         if (bloodSolution.Volume <= FixedPoint2.Zero)
