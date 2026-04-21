@@ -27,7 +27,7 @@ public sealed partial class VampireComponent : Component
     public EntityUid? Matriarch;
 
     [DataField]
-    public float Blood = 0f;
+    public float Blood = 30f;
 
     [DataField]
     public float MaxBlood = 100f;
