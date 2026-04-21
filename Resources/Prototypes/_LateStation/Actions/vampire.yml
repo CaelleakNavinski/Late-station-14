@@ -53,7 +53,7 @@
     itemIconStyle: BigAction
     icon:
       sprite: _LateStation/Interface/Actions/actions_vampire.rsi
-      state: blood_sprint
+      state: mist_form
     useDelay: 60
   - type: InstantAction
     event: !type:VampireMistFormActionEvent
