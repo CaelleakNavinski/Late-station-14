@@ -49,7 +49,7 @@ public sealed partial class VampireComponent : Component
     /// Blood cost to activate Bloodsprint.
     /// </summary>
     [DataField]
-    public float BloodSprintCost = 18f;
+    public float BloodSprintCost = 12f;
 
     /// <summary>
     /// Duration of Bloodsprint.
@@ -61,19 +61,22 @@ public sealed partial class VampireComponent : Component
     /// Walk speed modifier while Bloodsprint is active.
     /// </summary>
     [DataField]
-    public float BloodSprintWalkSpeedModifier = 1.32f;
+    public float BloodSprintWalkSpeedModifier = 1.22f;
 
     /// <summary>
     /// Sprint speed modifier while Bloodsprint is active.
     /// </summary>
     [DataField]
-    public float BloodSprintSprintSpeedModifier = 1.40f;
+    public float BloodSprintSprintSpeedModifier = 1.30f;
 
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
     public TimeSpan BloodSprintEndTime = TimeSpan.Zero;
 
+    /// <summary>
+    /// Blood cost to activate Mist Form.
+    /// </summary>
     [DataField]
-    public float MistFormCost = 34f;
+    public float MistFormCost = 18f;
 
     /// <summary>
     /// After 60 seconds without a successful feed, blood begins decaying.
@@ -96,4 +99,5 @@ public sealed partial class VampireComponent : Component
     public EntityUid? BiteAction;
     public EntityUid? FeedAction;
     public EntityUid? BloodSprintAction;
+    public EntityUid? MistFormAction;
 }
