@@ -218,12 +218,13 @@ public sealed class VampireSystem : EntitySystem
         if (!TryComp<HungerComponent>(ent.Owner, out var hunger))
             return;
 
-        var hungerValue = hunger.Thresholds[HungerThreshold.Overfed] * GetBloodRatio(ent.Comp);
+        _hunger.SetBaseDecayRate(ent.Owner, 0f, hunger);
 
-        if (hunger.BaseDecayRate == 0f && MathF.Abs(_hunger.GetHunger(hunger) - hungerValue) <= 0.01f)
+        var hungerValue = _hunger.GetHungerForRatio(hunger, GetBloodRatio(ent.Comp));
+
+        if (MathF.Abs(_hunger.GetHunger(hunger) - hungerValue) <= 0.01f)
             return;
 
-        hunger.BaseDecayRate = 0f;
         _hunger.SetHunger(ent.Owner, hungerValue, hunger);
     }
 
