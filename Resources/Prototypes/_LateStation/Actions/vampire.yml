@@ -42,3 +42,15 @@
     useDelay: 20
   - type: InstantAction
     event: !type:VampireBloodSprintActionEvent
+
+- type: entity
+  id: ActionVampireMistForm
+  parent: BaseAction
+  name: Mist Form
+  description: Dissolve into a drifting ethereal form for a moment to escape danger.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 60
+  - type: InstantAction
+    event: !type:VampireMistFormActionEvent

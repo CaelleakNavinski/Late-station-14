@@ -2,6 +2,7 @@ using System;
 using Content.Server.Actions;
 using Content.Server.Antag;
 using Content.Server.Mind;
+using Content.Server.Polymorph.Systems;
 using Content.Server.Roles;
 using Content.Shared.Alert;
 using Content.Shared.Body.Components;
@@ -26,6 +27,8 @@ namespace Content.Server._LateStation.Vampire;
 /// First implementation slice for vampires:
 /// - Converting Bite action
 /// - Feed action
+/// - Bloodsprint action
+/// - Mist Form action
 /// - timed turning state
 /// - blood resource / decay groundwork
 /// - completion into Vampire / Exarch-capable vampire
@@ -37,6 +40,7 @@ public sealed class VampireSystem : EntitySystem
     private const string BloodSprintActionId = "ActionVampireBloodSprint";
     private const string FeedActionId = "ActionVampireFeed";
     private const string MindRoleVampire = "MindRoleVampire";
+    private const string MistFormActionId = "ActionVampireMistForm";
 
     [Dependency] private readonly ActionsSystem _actions = default!;
     [Dependency] private readonly AlertsSystem _alerts = default!;
@@ -46,6 +50,7 @@ public sealed class VampireSystem : EntitySystem
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly MovementSpeedModifierSystem _movementSpeed = default!;
+    [Dependency] private readonly PolymorphSystem _polymorph = default!;
     [Dependency] private readonly RoleSystem _role = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
@@ -61,6 +66,7 @@ public sealed class VampireSystem : EntitySystem
         SubscribeLocalEvent<VampireComponent, VampireBiteActionEvent>(OnBiteAction);
         SubscribeLocalEvent<VampireComponent, VampireBiteDoAfterEvent>(OnBiteDoAfter);
         SubscribeLocalEvent<VampireComponent, VampireBloodSprintActionEvent>(OnBloodSprintAction);
+        SubscribeLocalEvent<VampireComponent, VampireMistFormActionEvent>(OnMistFormAction);
         SubscribeLocalEvent<VampireComponent, VampireFeedActionEvent>(OnFeedAction);
         SubscribeLocalEvent<VampireComponent, VampireFeedDoAfterEvent>(OnFeedDoAfter);
     }
@@ -75,6 +81,7 @@ public sealed class VampireSystem : EntitySystem
         _actions.RemoveAction(ent.Owner, ent.Comp.BiteAction);
         _actions.RemoveAction(ent.Owner, ent.Comp.FeedAction);
         _actions.RemoveAction(ent.Owner, ent.Comp.BloodSprintAction);
+        _actions.RemoveAction(ent.Owner, ent.Comp.MistFormAction);
     }
 
     public override void Update(float frameTime)
@@ -124,6 +131,7 @@ public sealed class VampireSystem : EntitySystem
         {
             _actions.AddAction(ent.Owner, ref ent.Comp.BiteAction, BiteActionId);
             _actions.AddAction(ent.Owner, ref ent.Comp.BloodSprintAction, BloodSprintActionId);
+            _actions.AddAction(ent.Owner, ref ent.Comp.MistFormAction, MistFormActionId);
             return;
         }
 
@@ -137,6 +145,12 @@ public sealed class VampireSystem : EntitySystem
         {
             _actions.RemoveAction(ent.Owner, ent.Comp.BloodSprintAction);
             ent.Comp.BloodSprintAction = null;
+        }
+
+        if (ent.Comp.MistFormAction != null)
+        {
+            _actions.RemoveAction(ent.Owner, ent.Comp.MistFormAction);
+            ent.Comp.MistFormAction = null;
         }
     }
 
@@ -216,6 +230,29 @@ public sealed class VampireSystem : EntitySystem
         Dirty(ent.Owner, ent.Comp);
         _movementSpeed.RefreshMovementSpeedModifiers(ent.Owner);
 
+        args.Handled = true;
+    }
+
+    private void OnMistFormAction(Entity<VampireComponent> ent, ref VampireMistFormActionEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        if (!HasSireAbilities(ent.Owner, ent.Comp))
+            return;
+
+        if (ent.Comp.Blood < ent.Comp.MistFormCost)
+            return;
+
+        if (_polymorph.PolymorphEntity(ent.Owner, "Jaunt") == null)
+            return;
+
+        ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - ent.Comp.MistFormCost);
+        ent.Comp.LastFeedTime = _timing.CurTime;
+        ent.Comp.NextBloodDecayTick =
+            _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
+
+        Dirty(ent.Owner, ent.Comp);
         args.Handled = true;
     }
 

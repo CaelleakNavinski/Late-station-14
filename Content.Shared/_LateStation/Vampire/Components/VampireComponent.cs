@@ -72,6 +72,12 @@ public sealed partial class VampireComponent : Component
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
     public TimeSpan BloodSprintEndTime = TimeSpan.Zero;
 
+    [DataField]
+    public float MistFormCost = 34f;
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    public TimeSpan BloodSprintEndTime = TimeSpan.Zero;
+
     /// <summary>
     /// After 60 seconds without a successful feed, blood begins decaying.
     /// </summary>
