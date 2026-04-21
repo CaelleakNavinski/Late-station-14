@@ -39,6 +39,7 @@ namespace Content.Server._LateStation.Vampire;
 /// </summary>
 public sealed class VampireSystem : EntitySystem
 {
+    private const float HungerRatioScale = 200f;
     private const string BiteActionId = "ActionVampireBite";
     private const string BloodAlertId = "VampireBloodMeter";
     private const string BloodSprintActionId = "ActionVampireBloodSprint";
@@ -218,9 +219,7 @@ public sealed class VampireSystem : EntitySystem
         if (!TryComp<HungerComponent>(ent.Owner, out var hunger))
             return;
 
-        _hunger.SetBaseDecayRate(ent.Owner, 0f, hunger);
-
-        var hungerValue = _hunger.GetHungerForRatio(hunger, GetBloodRatio(ent.Comp));
+        var hungerValue = HungerRatioScale * GetBloodRatio(ent.Comp);
 
         if (MathF.Abs(_hunger.GetHunger(hunger) - hungerValue) <= 0.01f)
             return;
