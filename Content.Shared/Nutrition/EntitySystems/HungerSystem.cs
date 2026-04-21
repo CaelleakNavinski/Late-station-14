@@ -104,6 +104,29 @@ public sealed class HungerSystem : EntitySystem
         UpdateCurrentThreshold(uid, component);
     }
 
+    public float GetHungerForRatio(HungerComponent component, float ratio)
+    {
+        return component.Thresholds[HungerThreshold.Overfed] * Math.Clamp(ratio, 0f, 1f);
+    }
+
+    public void SetBaseDecayRate(EntityUid uid, float baseDecayRate, HungerComponent? component = null)
+    {
+        if (!Resolve(uid, ref component))
+            return;
+
+        if (component.BaseDecayRate == baseDecayRate)
+            return;
+
+        SetAuthoritativeHungerValue((uid, component), GetHunger(component));
+        component.BaseDecayRate = baseDecayRate;
+        component.ActualDecayRate = component.BaseDecayRate;
+
+        if (component.HungerThresholdDecayModifiers.TryGetValue(component.CurrentThreshold, out var modifier))
+            component.ActualDecayRate *= modifier;
+
+        DirtyField(uid, component, nameof(HungerComponent.ActualDecayRate));
+    }
+
     /// <summary>
     /// Sets <see cref="HungerComponent.LastAuthoritativeHungerValue"/> and
     /// <see cref="HungerComponent.LastAuthoritativeHungerChangeTime"/>, and dirties this entity. This "resets" the
