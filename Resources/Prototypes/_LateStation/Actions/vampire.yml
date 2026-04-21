@@ -51,6 +51,9 @@
   components:
   - type: Action
     itemIconStyle: BigAction
+    icon:
+      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      state: blood_sprint
     useDelay: 60
   - type: InstantAction
     event: !type:VampireMistFormActionEvent
