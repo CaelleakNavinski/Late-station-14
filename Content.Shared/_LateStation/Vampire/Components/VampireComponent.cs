@@ -81,7 +81,7 @@ public sealed partial class VampireComponent : Component
 
     /// <summary>
     /// The radio channel intrinsically granted to vampires.
-    /// This channel has no dedicated keycode and is intended to be reached through the default channel prefix (:h).
+    /// This channel's dedicated keycode is (:r), but is also set to the default radio (:h).
     /// </summary>
     [DataField]
     public ProtoId<RadioChannelPrototype> RadioChannel = "Vampire";
