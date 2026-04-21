@@ -14,6 +14,8 @@ using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Systems;
+using Content.Shared.Nutrition.Components;
+using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Popups;
 using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
@@ -47,6 +49,7 @@ public sealed class VampireSystem : EntitySystem
     [Dependency] private readonly ActionsSystem _actions = default!;
     [Dependency] private readonly AlertsSystem _alerts = default!;
     [Dependency] private readonly AntagSelectionSystem _antag = default!;
+    [Dependency] private readonly HungerSystem _hunger = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly MindSystem _mind = default!;
@@ -78,6 +81,7 @@ public sealed class VampireSystem : EntitySystem
     {
         SyncActions(ent);
         SyncIntrinsicRadio(ent);
+        SyncVampireHunger(ent);
     }
 
     private void OnVampireShutdown(Entity<VampireComponent> ent, ref ComponentShutdown args)
@@ -101,6 +105,7 @@ public sealed class VampireSystem : EntitySystem
         {
             SyncActions((uid, vampire));
             ProcessBloodDecay((uid, vampire));
+            SyncVampireHunger((uid, vampire));
             UpdateBloodAlert(uid, vampire);
 
             if (vampire.BloodSprintEndTime != TimeSpan.Zero && vampire.BloodSprintEndTime <= curTime)
@@ -193,7 +198,7 @@ public sealed class VampireSystem : EntitySystem
 
     private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
     {
-        var ratio = comp.Blood / comp.MaxBlood;
+        var ratio = GetBloodRatio(comp);
 
         short severity = ratio switch
         {
@@ -206,6 +211,28 @@ public sealed class VampireSystem : EntitySystem
         };
 
         _alerts.ShowAlert(uid, BloodAlertId, severity);
+    }
+
+    private void SyncVampireHunger(Entity<VampireComponent> ent)
+    {
+        if (!TryComp<HungerComponent>(ent.Owner, out var hunger))
+            return;
+
+        var hungerValue = hunger.Thresholds[HungerThreshold.Overfed] * GetBloodRatio(ent.Comp);
+
+        if (hunger.BaseDecayRate == 0f && MathF.Abs(_hunger.GetHunger(hunger) - hungerValue) <= 0.01f)
+            return;
+
+        hunger.BaseDecayRate = 0f;
+        _hunger.SetHunger(ent.Owner, hungerValue, hunger);
+    }
+
+    private static float GetBloodRatio(VampireComponent comp)
+    {
+        if (comp.MaxBlood <= 0f)
+            return 0f;
+
+        return Math.Clamp(comp.Blood / comp.MaxBlood, 0f, 1f);
     }
 
     private void OnRefreshMovementSpeedModifiers(Entity<VampireComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
