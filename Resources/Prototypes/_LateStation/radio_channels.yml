@@ -1,0 +1,7 @@
+- type: radioChannel
+  id: Vampire
+  name: chat-radio-vampire
+  keycode: 'r'
+  frequency: 1666
+  color: "#8f1a2c"
+  longRange: true

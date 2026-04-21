@@ -1,4 +1,5 @@
 using System;
+using Content.Shared.Radio;
 using Content.Shared.StatusIcon;
 using Robust.Shared.GameObjects;
 using Robust.Shared.GameStates;
@@ -77,6 +78,25 @@ public sealed partial class VampireComponent : Component
     /// </summary>
     [DataField]
     public float MistFormCost = 18f;
+
+    /// <summary>
+    /// The radio channel intrinsically granted to vampires.
+    /// This channel has no dedicated keycode and is intended to be reached through the default channel prefix (:h).
+    /// </summary>
+    [DataField]
+    public ProtoId<RadioChannelPrototype> RadioChannel = "Vampire";
+
+    /// <summary>
+    /// Tracks which channels this component added to ActiveRadioComponent.
+    /// </summary>
+    [DataField]
+    public HashSet<ProtoId<RadioChannelPrototype>> ActiveAddedChannels = new();
+
+    /// <summary>
+    /// Tracks which channels this component added to IntrinsicRadioTransmitterComponent.
+    /// </summary>
+    [DataField]
+    public HashSet<ProtoId<RadioChannelPrototype>> TransmitterAddedChannels = new();
 
     /// <summary>
     /// After 60 seconds without a successful feed, blood begins decaying.

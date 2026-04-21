@@ -15,6 +15,8 @@ using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Radio;
+using Content.Shared.Radio.Components;
 using Content.Shared._LateStation.Roles.Components;
 using Content.Shared._LateStation.Vampire;
 using Content.Shared._LateStation.Vampire.Components;
@@ -62,6 +64,7 @@ public sealed class VampireSystem : EntitySystem
 
         SubscribeLocalEvent<VampireComponent, ComponentStartup>(OnVampireStartup);
         SubscribeLocalEvent<VampireComponent, ComponentShutdown>(OnVampireShutdown);
+        SubscribeLocalEvent<VampireComponent, GetDefaultRadioChannelEvent>(OnGetDefaultRadioChannel);
         SubscribeLocalEvent<VampireComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshMovementSpeedModifiers);
         SubscribeLocalEvent<VampireComponent, VampireBiteActionEvent>(OnBiteAction);
         SubscribeLocalEvent<VampireComponent, VampireBiteDoAfterEvent>(OnBiteDoAfter);
@@ -74,6 +77,7 @@ public sealed class VampireSystem : EntitySystem
     private void OnVampireStartup(Entity<VampireComponent> ent, ref ComponentStartup args)
     {
         SyncActions(ent);
+        SyncIntrinsicRadio(ent);
     }
 
     private void OnVampireShutdown(Entity<VampireComponent> ent, ref ComponentShutdown args)
@@ -82,6 +86,8 @@ public sealed class VampireSystem : EntitySystem
         _actions.RemoveAction(ent.Owner, ent.Comp.FeedAction);
         _actions.RemoveAction(ent.Owner, ent.Comp.BloodSprintAction);
         _actions.RemoveAction(ent.Owner, ent.Comp.MistFormAction);
+
+        RemoveIntrinsicRadio(ent);
     }
 
     public override void Update(float frameTime)
@@ -527,6 +533,53 @@ public sealed class VampireSystem : EntitySystem
         _role.MindAddRole(mindId, MindRoleVampire);
 
         _antag.SendBriefing(uid, Loc.GetString("vamp-role-greeting"), Color.Red, null);
+    }
+
+    private void OnGetDefaultRadioChannel(Entity<VampireComponent> ent, ref GetDefaultRadioChannelEvent args)
+    {
+        args.Channel = ent.Comp.RadioChannel;
+    }
+
+    private void SyncIntrinsicRadio(Entity<VampireComponent> ent)
+    {
+        var activeRadio = EnsureComp<ActiveRadioComponent>(ent.Owner);
+        if (activeRadio.Channels.Add(ent.Comp.RadioChannel))
+            ent.Comp.ActiveAddedChannels.Add(ent.Comp.RadioChannel);
+
+        EnsureComp<IntrinsicRadioReceiverComponent>(ent.Owner);
+
+        var transmitter = EnsureComp<IntrinsicRadioTransmitterComponent>(ent.Owner);
+        if (transmitter.Channels.Add(ent.Comp.RadioChannel))
+            ent.Comp.TransmitterAddedChannels.Add(ent.Comp.RadioChannel);
+    }
+
+    private void RemoveIntrinsicRadio(Entity<VampireComponent> ent)
+    {
+        if (TryComp<ActiveRadioComponent>(ent.Owner, out var activeRadio))
+        {
+            foreach (var channel in ent.Comp.ActiveAddedChannels)
+            {
+                activeRadio.Channels.Remove(channel);
+            }
+
+            ent.Comp.ActiveAddedChannels.Clear();
+
+            if (activeRadio.Channels.Count == 0)
+                RemCompDeferred<ActiveRadioComponent>(ent.Owner);
+        }
+
+        if (TryComp<IntrinsicRadioTransmitterComponent>(ent.Owner, out var transmitter))
+        {
+            foreach (var channel in ent.Comp.TransmitterAddedChannels)
+            {
+                transmitter.Channels.Remove(channel);
+            }
+
+            ent.Comp.TransmitterAddedChannels.Clear();
+
+            if (transmitter.Channels.Count == 0)
+                RemCompDeferred<IntrinsicRadioTransmitterComponent>(ent.Owner);
+        }
     }
 
     private EntityUid? ResolveMatriarch(EntityUid? source)

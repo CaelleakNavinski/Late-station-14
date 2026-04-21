@@ -58,6 +58,8 @@ vamp-no-matriarch = There was no Vampire Matriarch to be selected. Cannot start 
 
 vamp-bite-marks-examine = They have two puncture wounds on their neck!
 
+chat-radio-vampire = Vampire
+
 ## Outcomes
 vamp-won = The vampires have consumed or converted enough crew members. Night claims all.
 vamp-lost = The Matriarch has fallen and the remaining brood were destroyed in the dawn’s fire.
