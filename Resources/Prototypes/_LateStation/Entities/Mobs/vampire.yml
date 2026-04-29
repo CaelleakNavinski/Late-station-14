@@ -1,0 +1,43 @@
+- type: entity
+  id: MobVampireMist
+  name: crimson mist
+  description: A drifting crimson haze that flickers with stolen life.
+  parent: [BaseMob, MobPolymorphable, MobDamageable, MobAtmosExposed, MobFlammable]
+  suffix: Vampire
+  components:
+  - type: Sprite
+    sprite: Mobs/Ghosts/ghost_human.rsi
+    color: "#c43a62cc"
+    layers:
+    - state: animated
+      shader: unshaded
+    noRot: true
+    overrideContainerOcclusion: true
+    drawdepth: Ghosts
+  - type: ContentEye
+    maxZoom: 1.44,1.44
+  - type: Eye
+    drawFov: false
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.35
+        density: 120
+        mask:
+        - Opaque
+        layer:
+        - None
+  - type: Damageable
+    damageContainer: Biological
+    damageModifierSet: VampireMist
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 4
+    baseSprintSpeed: 6
+  - type: StandingState
+  - type: Spectral
+  - type: NoSlip
+  - type: Tag
+    tags:
+    - DoorBumpOpener

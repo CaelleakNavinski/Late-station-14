@@ -215,7 +215,6 @@ public sealed partial class AdminVerbSystem
 
                 var vampireComp = EnsureComp<VampireComponent>(args.Target);
                 EnsureComp<VampireMatriarchComponent>(args.Target);
-
                 vampireComp.IsExarch = true;
                 vampireComp.Matriarch = args.Target;
             },

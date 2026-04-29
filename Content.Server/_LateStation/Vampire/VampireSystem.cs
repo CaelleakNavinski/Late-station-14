@@ -277,7 +277,7 @@ public sealed class VampireSystem : EntitySystem
         if (ent.Comp.Blood < ent.Comp.MistFormCost)
             return;
 
-        if (_polymorph.PolymorphEntity(ent.Owner, "Jaunt") == null)
+        if (_polymorph.PolymorphEntity(ent.Owner, "VampireMistForm") == null)
             return;
 
         ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - ent.Comp.MistFormCost);

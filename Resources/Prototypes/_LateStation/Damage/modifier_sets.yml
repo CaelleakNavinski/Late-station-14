@@ -4,3 +4,11 @@
     Blunt: 1.15
     Cold: 0.6
     Heat: 1.1
+
+- type: damageModifierSet
+  id: VampireMist
+  coefficients:
+    Blunt: 0.0
+    Slash: 0.0
+    Piercing: 0.0
+    Heat: 1.5

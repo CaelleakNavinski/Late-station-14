@@ -7,7 +7,7 @@
   - type: Action
     itemIconStyle: BigAction
     icon:
-      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      sprite: Interface/Actions/actions_vampire.rsi
       state: sire_bite
   - type: TargetAction
   - type: EntityTargetAction
@@ -22,7 +22,7 @@
   - type: Action
     itemIconStyle: BigAction
     icon:
-      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      sprite: Interface/Actions/actions_vampire.rsi
       state: feed
   - type: TargetAction
   - type: EntityTargetAction
@@ -37,7 +37,7 @@
   - type: Action
     itemIconStyle: BigAction
     icon:
-      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      sprite: Interface/Actions/actions_vampire.rsi
       state: blood_sprint
     useDelay: 20
   - type: InstantAction
@@ -52,7 +52,7 @@
   - type: Action
     itemIconStyle: BigAction
     icon:
-      sprite: _LateStation/Interface/Actions/actions_vampire.rsi
+      sprite: Interface/Actions/actions_vampire.rsi
       state: mist_form
     useDelay: 60
   - type: InstantAction

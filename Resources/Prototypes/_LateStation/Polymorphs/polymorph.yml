@@ -182,3 +182,18 @@
     revertOnCrit: true
     allowRepeatedMorphs: true
     transferDamage: true
+
+- type: polymorph
+  id: VampireMistForm
+  configuration:
+    entity: MobVampireMist
+    transferName: true
+    inventory: None
+    forced: true
+    revertOnDeath: true
+    revertOnCrit: true
+    allowRepeatedMorphs: false
+    transferDamage: true
+    polymorphSound: /Audio/Magic/ethereal_enter.ogg
+    exitPolymorphSound: /Audio/Magic/ethereal_exit.ogg
+    duration: 3
