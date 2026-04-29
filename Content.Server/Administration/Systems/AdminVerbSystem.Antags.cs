@@ -204,24 +204,20 @@ public sealed partial class AdminVerbSystem
              Text = vampireMatriarchName,
              Category = VerbCategory.Antag,
              Icon = new SpriteSpecifier.Rsi(new("/Textures/_LateStation/Interface/Misc/vampire_faction_icons.rsi"), "vampire_matriarch"),
-             Act = () =>
+            Act = () =>
             {
                 RemComp<VampireTurningComponent>(args.Target);
 
-                var vampireComp = EnsureComp<VampireComponent>(args.Target);
-
                 if (_mindSystem.TryGetMind(args.Target, out var mindId, out _))
-                {
                     _role.MindRemoveRole<VampireRoleComponent>(mindId);
 
-                    if (!_role.MindHasRole<VampireMatriarchRoleComponent>(mindId))
-                        _role.MindAddRole(mindId, "MindRoleVampireMatriarch");
-                }
+                _antag.ForceMakeAntag<VampireRuleComponent>(targetPlayer, DefaultVampireRule);
+
+                var vampireComp = EnsureComp<VampireComponent>(args.Target);
+                EnsureComp<VampireMatriarchComponent>(args.Target);
 
                 vampireComp.IsExarch = true;
                 vampireComp.Matriarch = args.Target;
-
-                _antag.SendBriefing(args.Target, Loc.GetString("vamp-mat-role-greeting"), Color.Red, null);
             },
             Impact = LogImpact.High,
             Message = string.Join(": ", vampireMatriarchName, Loc.GetString("admin-verb-make-vampire-matriarch")),
