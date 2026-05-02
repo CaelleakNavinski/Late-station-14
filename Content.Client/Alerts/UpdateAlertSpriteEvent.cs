@@ -1,5 +1,6 @@
 using Content.Shared.Alert;
 using Robust.Client.GameObjects;
+using Robust.Shared.Utility;
 
 namespace Content.Client.Alerts;
 
@@ -21,4 +22,13 @@ public record struct UpdateAlertSpriteEvent
         ViewerEnt = viewerEnt;
         Alert = alert;
     }
+}
+
+/// <summary>
+/// Event raised on the local player to allow alerts to provide a custom tooltip description.
+/// </summary>
+[ByRefEvent]
+public record struct GetAlertTooltipEvent(AlertPrototype Alert, FormattedMessage? Description = null)
+{
+    public bool Handled => Description != null;
 }

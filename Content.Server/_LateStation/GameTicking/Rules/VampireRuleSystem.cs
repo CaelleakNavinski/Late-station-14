@@ -2,7 +2,6 @@ using Content.Server.Antag;
 using Content.Server.GameTicking;
 using Content.Server.GameTicking.Rules;
 using Content.Server.Mind;
-using Content.Server.Roles;
 using Content.Server.RoundEnd;
 using Content.Server._LateStation.GameTicking.Rules.Components;
 using Content.Shared.GameTicking.Components;
@@ -13,31 +12,12 @@ namespace Content.Server._LateStation.GameTicking.Rules;
 
 /// <summary>
 /// Baseline Vampire round-rule scaffold.
-/// This pass wires role briefings, activates the Matriarch body-state,
-/// and reports brood counts at round end.
+/// Activates the Matriarch body-state and reports brood counts at round end.
 /// </summary>
 public sealed class VampireRuleSystem : GameRuleSystem<VampireRuleComponent>
 {
     [Dependency] private readonly AntagSelectionSystem _antag = default!;
     [Dependency] private readonly MindSystem _mind = default!;
-
-    public override void Initialize()
-    {
-        base.Initialize();
-
-        SubscribeLocalEvent<VampireMatriarchRoleComponent, GetBriefingEvent>(OnGetMatriarchBriefing);
-        SubscribeLocalEvent<VampireRoleComponent, GetBriefingEvent>(OnGetVampireBriefing);
-    }
-
-    private void OnGetMatriarchBriefing(Entity<VampireMatriarchRoleComponent> ent, ref GetBriefingEvent args)
-    {
-        args.Append(Loc.GetString("vamp-mat-briefing"));
-    }
-
-    private void OnGetVampireBriefing(Entity<VampireRoleComponent> ent, ref GetBriefingEvent args)
-    {
-        args.Append(Loc.GetString("vamp-briefing"));
-    }
 
     protected override void Started(
         EntityUid uid,

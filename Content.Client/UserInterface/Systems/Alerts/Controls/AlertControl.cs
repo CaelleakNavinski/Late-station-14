@@ -1,8 +1,10 @@
 using System.Numerics;
 using Content.Client.Actions.UI;
+using Content.Client.Alerts;
 using Content.Client.Cooldown;
 using Content.Shared.Alert;
 using Robust.Client.GameObjects;
+using Robust.Client.Player;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Timing;
@@ -13,6 +15,7 @@ namespace Content.Client.UserInterface.Systems.Alerts.Controls
     public sealed class AlertControl : BaseButton
     {
         [Dependency] private readonly IEntityManager _entityManager = default!;
+        [Dependency] private readonly IPlayerManager _player = default!;
 
         private readonly SpriteSystem _sprite;
 
@@ -81,7 +84,18 @@ namespace Content.Client.UserInterface.Systems.Alerts.Controls
         private Control SupplyTooltip(Control? sender)
         {
             var msg = FormattedMessage.FromMarkupOrThrow(Loc.GetString(Alert.Name));
-            var desc = FormattedMessage.FromMarkupOrThrow(Loc.GetString(Alert.Description));
+            FormattedMessage? desc = null;
+
+            if (_player.LocalEntity is { } player)
+            {
+                var ev = new GetAlertTooltipEvent(Alert);
+                _entityManager.EventBus.RaiseLocalEvent(player, ref ev);
+
+                if (ev.Handled)
+                    desc = ev.Description;
+            }
+
+            desc ??= FormattedMessage.FromMarkupOrThrow(Loc.GetString(Alert.Description));
             return new ActionAlertTooltip(msg, desc) { Cooldown = Cooldown };
         }
 

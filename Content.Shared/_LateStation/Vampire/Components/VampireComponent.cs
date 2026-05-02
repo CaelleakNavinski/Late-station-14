@@ -12,7 +12,7 @@ namespace Content.Shared._LateStation.Vampire.Components;
 /// Applied to completed vampires.
 /// Tracks conversion permission, brood lineage, and blood resource state.
 /// </summary>
-[RegisterComponent, NetworkedComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(fieldDeltas: true)]
 public sealed partial class VampireComponent : Component
 {
     [DataField]
@@ -27,17 +27,18 @@ public sealed partial class VampireComponent : Component
     public EntityUid? Matriarch;
 
     [DataField]
+    [AutoNetworkedField]
     public float Blood = 30f;
 
     [DataField]
-    public float MaxBlood = 100f;
+    public float MaxBlood = 200f;
 
     /// <summary>
     /// The percentage of the victim's current bloodstream volume removed on each completed feed cycle.
-    /// Example: 0.05 = 5% of their current blood.
+    /// Example: 0.02 = 2% of their current blood.
     /// </summary>
     [DataField]
-    public float FeedTargetBloodDrainFraction = 0.05f;
+    public float FeedTargetBloodDrainFraction = 0.02f;
 
     /// <summary>
     /// How efficiently extracted victim blood becomes vampire blood.
@@ -97,24 +98,6 @@ public sealed partial class VampireComponent : Component
     /// </summary>
     [DataField]
     public HashSet<ProtoId<RadioChannelPrototype>> TransmitterAddedChannels = new();
-
-    /// <summary>
-    /// After 60 seconds without a successful feed, blood begins decaying.
-    /// </summary>
-    [DataField]
-    public TimeSpan BloodDecayDelay = TimeSpan.FromSeconds(60);
-
-    /// <summary>
-    /// While decaying, lose 1 blood every 4 seconds.
-    /// </summary>
-    [DataField]
-    public TimeSpan BloodDecayInterval = TimeSpan.FromSeconds(4);
-
-    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
-    public TimeSpan LastFeedTime = TimeSpan.Zero;
-
-    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
-    public TimeSpan NextBloodDecayTick = TimeSpan.Zero;
 
     public EntityUid? BiteAction;
     public EntityUid? FeedAction;

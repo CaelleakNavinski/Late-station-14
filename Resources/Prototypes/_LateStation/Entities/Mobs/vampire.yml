@@ -29,6 +29,15 @@
         - Opaque
         layer:
         - None
+      fix2:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.35
+        density: 120
+        mask:
+        - SmallMobMask
+        layer:
+        - None
   - type: Damageable
     damageContainer: Biological
     damageModifierSet: VampireMist

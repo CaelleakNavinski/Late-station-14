@@ -9,12 +9,17 @@
     exclusiveAntag: true
     roleType: TeamAntagonist
   - type: VampireMatriarchRole
+  - type: RoleBriefing
+    briefing: vamp-mat-briefing
 
 - type: entity
-  parent: MindRoleVampireMatriarch
+  parent: MindRoleGhostRoleTeamAntagonistFlock
   id: MindRoleVampire
   name: Vampire Role
   components:
   - type: MindRole
     antagPrototype: Vamp
+    exclusiveAntag: true
   - type: VampireRole
+  - type: RoleBriefing
+    briefing: vamp-briefing

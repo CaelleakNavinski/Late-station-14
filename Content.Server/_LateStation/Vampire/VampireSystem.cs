@@ -1,6 +1,7 @@
 using System;
 using Content.Server.Actions;
 using Content.Server.Antag;
+using Content.Server.Bible.Components;
 using Content.Server.Mind;
 using Content.Server.Polymorph.Systems;
 using Content.Server.Roles;
@@ -34,7 +35,7 @@ namespace Content.Server._LateStation.Vampire;
 /// - Bloodsprint action
 /// - Mist Form action
 /// - timed turning state
-/// - blood resource / decay groundwork
+/// - blood resource tracking
 /// - completion into Vampire / Exarch-capable vampire
 /// </summary>
 public sealed class VampireSystem : EntitySystem
@@ -105,7 +106,6 @@ public sealed class VampireSystem : EntitySystem
         while (vampireQuery.MoveNext(out var uid, out var vampire))
         {
             SyncActions((uid, vampire));
-            ProcessBloodDecay((uid, vampire));
             SyncVampireHunger((uid, vampire));
             UpdateBloodAlert(uid, vampire);
 
@@ -180,23 +180,6 @@ public sealed class VampireSystem : EntitySystem
         return false;
     }
 
-    private void ProcessBloodDecay(Entity<VampireComponent> ent)
-    {
-        if (ent.Comp.Blood <= 0f)
-            return;
-
-        if (ent.Comp.NextBloodDecayTick == TimeSpan.Zero)
-            ent.Comp.NextBloodDecayTick =
-                _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
-
-        if (ent.Comp.NextBloodDecayTick > _timing.CurTime)
-            return;
-
-        ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - 1f);
-        ent.Comp.NextBloodDecayTick = _timing.CurTime + ent.Comp.BloodDecayInterval;
-        Dirty(ent.Owner, ent.Comp);
-    }
-
     private void UpdateBloodAlert(EntityUid uid, VampireComponent comp)
     {
         var ratio = GetBloodRatio(comp);
@@ -256,9 +239,6 @@ public sealed class VampireSystem : EntitySystem
 
         ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - ent.Comp.BloodSprintCost);
         ent.Comp.BloodSprintEndTime = _timing.CurTime + ent.Comp.BloodSprintDuration;
-        ent.Comp.LastFeedTime = _timing.CurTime;
-        ent.Comp.NextBloodDecayTick =
-            _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
 
         Dirty(ent.Owner, ent.Comp);
         _movementSpeed.RefreshMovementSpeedModifiers(ent.Owner);
@@ -281,9 +261,6 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         ent.Comp.Blood = MathF.Max(0f, ent.Comp.Blood - ent.Comp.MistFormCost);
-        ent.Comp.LastFeedTime = _timing.CurTime;
-        ent.Comp.NextBloodDecayTick =
-            _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
 
         Dirty(ent.Owner, ent.Comp);
         args.Handled = true;
@@ -358,7 +335,7 @@ public sealed class VampireSystem : EntitySystem
         var doAfter = new DoAfterArgs(
             EntityManager,
             vampire,
-            TimeSpan.FromSeconds(2.5f),
+            TimeSpan.FromSeconds(1f),
             new VampireFeedDoAfterEvent(),
             target: target,
             used: vampire,
@@ -390,9 +367,6 @@ public sealed class VampireSystem : EntitySystem
             return;
 
         ent.Comp.Blood = MathF.Min(ent.Comp.MaxBlood, ent.Comp.Blood + gainedBlood);
-        ent.Comp.LastFeedTime = _timing.CurTime;
-        ent.Comp.NextBloodDecayTick =
-            _timing.CurTime + ent.Comp.BloodDecayDelay + ent.Comp.BloodDecayInterval;
         Dirty(ent.Owner, ent.Comp);
 
         if (ent.Comp.Blood < ent.Comp.MaxBlood && CanFeedTarget(ent.Owner, target))
@@ -411,6 +385,19 @@ public sealed class VampireSystem : EntitySystem
 
         if (!TryComp<HumanoidAppearanceComponent>(target, out _))
             return false;
+
+        if (HasComp<BibleUserComponent>(target))
+        {
+            _popup.PopupEntity(
+                Loc.GetString("vamp-target-immune-aura-popup", ("victim", target)),
+                vampire,
+                vampire);
+            _popup.PopupEntity(
+                Loc.GetString("vamp-victim-immune-aura-popup", ("vamp", vampire)),
+                target,
+                target);
+            return false;
+        }
 
         if (!TryComp<MobStateComponent>(target, out var mobState))
             return false;
@@ -473,6 +460,19 @@ public sealed class VampireSystem : EntitySystem
 
         if (!TryComp<HumanoidAppearanceComponent>(target, out _))
             return false;
+
+        if (HasComp<BibleUserComponent>(target))
+        {
+            _popup.PopupEntity(
+                Loc.GetString("vamp-target-immune-aura-popup", ("victim", target)),
+                vampire,
+                vampire);
+            _popup.PopupEntity(
+                Loc.GetString("vamp-victim-immune-aura-popup", ("vamp", vampire)),
+                target,
+                target);
+            return false;
+        }
 
         if (HasComp<VampireComponent>(target) || HasComp<VampireMatriarchComponent>(target))
         {
@@ -559,7 +559,8 @@ public sealed class VampireSystem : EntitySystem
 
         _role.MindAddRole(mindId, MindRoleVampire);
 
-        _antag.SendBriefing(uid, Loc.GetString("vamp-role-greeting"), Color.Red, null);
+        var briefing = _role.MindGetBriefing(mindId) ?? Loc.GetString("vamp-role-greeting");
+        _antag.SendBriefing(uid, briefing, Color.Red, null);
     }
 
     private void OnGetDefaultRadioChannel(Entity<VampireComponent> ent, ref GetDefaultRadioChannelEvent args)
